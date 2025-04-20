@@ -1,0 +1,48 @@
+﻿@page "/login"
+@using MudBlazor
+
+<MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center" Style="background-color:#f0f2f5; height:100vh;">
+    <MudItem xs="12" Style="text-align:center; margin-bottom:24px;">
+        <MudText Typo="Typo.h3" Color="Color.Primary">PROTEL</MudText>
+    </MudItem>
+    <MudItem xs="12" sm="8" md="4">
+        <MudPaper Class="pa-8 rounded-lg mud-elevation-8" Style="background-color:white;">
+            <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-6" Color="Color.Primary">
+                <MudIcon Icon="@Icons.Material.Filled.Lock" Class="mr-2" /> Inicio de Sesión
+            </MudText>
+            <MudTextField Label="Correo Electrónico" Variant="Variant.Outlined" @bind-Value="email" T="string" Class="mb-4"
+                          InputType="InputType.Email" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Mail" />
+            <MudTextField Label="Contraseña" InputType="InputType.Password" Variant="Variant.Outlined" @bind-Value="password" T="string" Class="mb-6"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Password" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="IniciarSesion" Class="mb-3">
+                <MudIcon Icon="@Icons.Material.Filled.Login" Class="mr-2" /> Acceder
+            </MudButton>
+            <MudLink Href="#" Align="Align.Center" Typo="Typo.caption">¿Olvidaste tu contraseña?</MudLink>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mt-4" ShowCloseButton="false">@errorMessage</MudAlert>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string email;
+    private string password;
+    private string errorMessage;
+
+    private void IniciarSesion()
+    {
+        // Aquí irá la lógica para verificar el correo y la contraseña
+        // y realizar la autenticación. Por ahora, solo mostramos un mensaje.
+        if (email == "usuario@ejemplo.com" && password == "contrasena")
+        {
+            errorMessage = "¡Inicio de sesión exitoso!";
+            // Aquí podrías redirigir al usuario a la página principal.
+        }
+        else
+        {
+            errorMessage = "Correo o contraseña incorrectos.";
+        }
+    }
+}
