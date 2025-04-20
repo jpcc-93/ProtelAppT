@@ -1,0 +1,201 @@
+﻿-- ============================================================================
+-- Script SQL para SQL Server: Esquema de Factibilidad
+-- Dividido en: Eliminación, Creación de Tablas y Creación de Restricciones
+-- ============================================================================
+
+-- ============================================================================
+-- PARTE 1: Eliminación de Tablas Existentes (en orden inverso de dependencia)
+-- Se usa IF OBJECT_ID para compatibilidad con diferentes versiones de SQL Server
+-- ============================================================================
+PRINT '--- Iniciando Eliminación de Tablas Existentes (si existen) ---';
+
+-- Eliminar tabla ASIGNACIONROLAUTORIZACION (depende de ROL, AUTORIZACION)
+IF OBJECT_ID('dbo.ASIGNACIONROLAUTORIZACION', 'U') IS NOT NULL
+BEGIN
+    PRINT 'Eliminando tabla ASIGNACIONROLAUTORIZACION...';
+    DROP TABLE dbo.ASIGNACIONROLAUTORIZACION;
+END
+
+-- Eliminar tabla FACTIBILIDAD (depende de CLIENTE, ESTADOFACTIBILIDAD)
+IF OBJECT_ID('dbo.FACTIBILIDAD', 'U') IS NOT NULL
+BEGIN
+    PRINT 'Eliminando tabla FACTIBILIDAD...';
+    DROP TABLE dbo.FACTIBILIDAD;
+END
+
+-- Eliminar tabla USUARIO (depende de ROL)
+IF OBJECT_ID('dbo.USUARIO', 'U') IS NOT NULL
+BEGIN
+    PRINT 'Eliminando tabla USUARIO...';
+    DROP TABLE dbo.USUARIO;
+END
+
+-- Eliminar tabla CLIENTE (depende de ESTADOCLIENTE)
+IF OBJECT_ID('dbo.CLIENTE', 'U') IS NOT NULL
+BEGIN
+    PRINT 'Eliminando tabla CLIENTE...';
+    DROP TABLE dbo.CLIENTE;
+END
+
+-- Eliminar tabla AUTORIZACION (referenciada por ASIGNACIONROLAUTORIZACION)
+IF OBJECT_ID('dbo.AUTORIZACION', 'U') IS NOT NULL
+BEGIN
+    PRINT 'Eliminando tabla AUTORIZACION...';
+    DROP TABLE dbo.AUTORIZACION;
+END
+
+-- Eliminar tabla ESTADOFACTIBILIDAD (referenciada por FACTIBILIDAD)
+IF OBJECT_ID('dbo.ESTADOFACTIBILIDAD', 'U') IS NOT NULL
+BEGIN
+    PRINT 'Eliminando tabla ESTADOFACTIBILIDAD...';
+    DROP TABLE dbo.ESTADOFACTIBILIDAD;
+END
+
+-- Eliminar tabla ESTADOCLIENTE (referenciada por CLIENTE)
+IF OBJECT_ID('dbo.ESTADOCLIENTE', 'U') IS NOT NULL
+BEGIN
+    PRINT 'Eliminando tabla ESTADOCLIENTE...';
+    DROP TABLE dbo.ESTADOCLIENTE;
+END
+
+-- Eliminar tabla ROL (referenciada por USUARIO, ASIGNACIONROLAUTORIZACION)
+IF OBJECT_ID('dbo.ROL', 'U') IS NOT NULL
+BEGIN
+    PRINT 'Eliminando tabla ROL...';
+    DROP TABLE dbo.ROL;
+END
+
+PRINT '--- Eliminación de Tablas Completada ---';
+PRINT '';
+
+-- ============================================================================
+-- PARTE 2: Creación de Tablas (Solo Columnas y NOT NULL)
+-- ============================================================================
+PRINT '--- Iniciando Creación de Tablas ---';
+
+-- Tabla para almacenar los roles de usuario
+PRINT 'Creando tabla ROL...';
+CREATE TABLE ROL (
+    ID_ROL INT NOT NULL,
+    NOMBRE VARCHAR(20) NOT NULL
+);
+
+-- Tabla para almacenar la información de los usuarios
+PRINT 'Creando tabla USUARIO...';
+CREATE TABLE USUARIO (
+    CORREO VARCHAR(100) NOT NULL,
+    NOMBRE VARCHAR(100) NOT NULL,
+    PASSWORD_HASH VARCHAR(255) NOT NULL,
+    ID_ROL INT NOT NULL
+);
+
+-- Tabla para almacenar los posibles estados de un cliente
+PRINT 'Creando tabla ESTADOCLIENTE...';
+CREATE TABLE ESTADOCLIENTE (
+    ID_ESTADO_CLIENTE INT NOT NULL,
+    NOMBRE VARCHAR(100) NOT NULL
+);
+
+-- Tabla para almacenar la información de los clientes
+PRINT 'Creando tabla CLIENTE...';
+CREATE TABLE CLIENTE (
+    ID_CLIENTE INT NOT NULL,
+    NOMBRE VARCHAR(100) NOT NULL,
+    DIRECCION VARCHAR(255) NULL, -- Permite nulos
+    TELEFONO VARCHAR(20) NULL,   -- Permite nulos
+    EMAIL VARCHAR(100) NULL,     -- Permite nulos (UNIQUE se añade luego)
+    FECHA_CREACION DATETIME2 NOT NULL DEFAULT GETDATE(),
+    FECHA_ACTUALIZACION DATETIME2 NULL,
+    ID_ESTADO_CLIENTE INT NOT NULL
+);
+
+-- Tabla para almacenar los posibles estados de una solicitud de factibilidad
+PRINT 'Creando tabla ESTADOFACTIBILIDAD...';
+CREATE TABLE ESTADOFACTIBILIDAD (
+    ID_ESTADO_FACTIBILIDAD INT NOT NULL,
+    NOMBRE VARCHAR(100) NOT NULL
+);
+
+-- Tabla principal para las solicitudes de factibilidad
+PRINT 'Creando tabla FACTIBILIDAD...';
+CREATE TABLE FACTIBILIDAD (
+    ID_FACTIBILIDAD INT NOT NULL,
+    ID_CLIENTE INT NOT NULL,
+    NOMBRE_PROYECTO VARCHAR(200) NOT NULL,
+    DESCRIPCION VARCHAR(255) NULL,
+    UBICACION VARCHAR(255) NOT NULL,
+    FECHA_SOLICITUD DATETIME2 NOT NULL DEFAULT GETDATE(),
+    FECHA_RESPUESTA DATETIME2 NULL,
+    ID_ESTADO_FACTIBILIDAD INT NOT NULL
+);
+
+-- Tabla para definir autorizaciones o permisos específicos en el sistema
+PRINT 'Creando tabla AUTORIZACION...';
+CREATE TABLE AUTORIZACION (
+    ID_AUTORIZACION INT NOT NULL,
+    NOMBRE_AUTORIZACION VARCHAR(50) NOT NULL,
+    DESCRIPCION_AUTORIZACION VARCHAR(255) NULL
+);
+
+-- Tabla para asignar autorizaciones a los roles
+PRINT 'Creando tabla ASIGNACIONROLAUTORIZACION...';
+CREATE TABLE ASIGNACIONROLAUTORIZACION (
+    ID_ASIGNACION INT NOT NULL,
+    ID_ROL INT NOT NULL,
+    ID_AUTORIZACION INT NOT NULL
+);
+
+PRINT '--- Creación de Tablas Completada ---';
+PRINT '';
+
+-- ============================================================================
+-- PARTE 3: Creación de Restricciones (Primary Keys, Unique, Foreign Keys)
+-- ============================================================================
+PRINT '--- Iniciando Creación de Restricciones ---';
+
+-- Restricciones para la tabla ROL
+PRINT 'Añadiendo restricciones a ROL...';
+ALTER TABLE dbo.ROL ADD CONSTRAINT PK_ROL PRIMARY KEY (ID_ROL);
+ALTER TABLE dbo.ROL ADD CONSTRAINT UQ_ROL_NOMBRE UNIQUE (NOMBRE);
+
+-- Restricciones para la tabla USUARIO
+PRINT 'Añadiendo restricciones a USUARIO...';
+ALTER TABLE dbo.USUARIO ADD CONSTRAINT PK_USUARIO PRIMARY KEY (CORREO);
+ALTER TABLE dbo.USUARIO ADD CONSTRAINT FK_USUARIO_ROL FOREIGN KEY (ID_ROL) REFERENCES dbo.ROL(ID_ROL);
+
+-- Restricciones para la tabla ESTADOCLIENTE
+PRINT 'Añadiendo restricciones a ESTADOCLIENTE...';
+ALTER TABLE dbo.ESTADOCLIENTE ADD CONSTRAINT PK_ESTADOCLIENTE PRIMARY KEY (ID_ESTADO_CLIENTE);
+ALTER TABLE dbo.ESTADOCLIENTE ADD CONSTRAINT UQ_ESTADOCLIENTE_NOMBRE UNIQUE (NOMBRE);
+
+-- Restricciones para la tabla CLIENTE
+PRINT 'Añadiendo restricciones a CLIENTE...';
+ALTER TABLE dbo.CLIENTE ADD CONSTRAINT PK_CLIENTE PRIMARY KEY (ID_CLIENTE);
+ALTER TABLE dbo.CLIENTE ADD CONSTRAINT UQ_CLIENTE_EMAIL UNIQUE (EMAIL); -- Asumiendo que el email debe ser único si se proporciona
+ALTER TABLE dbo.CLIENTE ADD CONSTRAINT FK_CLIENTE_ESTADOCLIENTE FOREIGN KEY (ID_ESTADO_CLIENTE) REFERENCES dbo.ESTADOCLIENTE(ID_ESTADO_CLIENTE);
+
+-- Restricciones para la tabla ESTADOFACTIBILIDAD
+PRINT 'Añadiendo restricciones a ESTADOFACTIBILIDAD...';
+ALTER TABLE dbo.ESTADOFACTIBILIDAD ADD CONSTRAINT PK_ESTADOFACTIBILIDAD PRIMARY KEY (ID_ESTADO_FACTIBILIDAD);
+ALTER TABLE dbo.ESTADOFACTIBILIDAD ADD CONSTRAINT UQ_ESTADOFACTIBILIDAD_NOMBRE UNIQUE (NOMBRE);
+
+-- Restricciones para la tabla FACTIBILIDAD
+PRINT 'Añadiendo restricciones a FACTIBILIDAD...';
+ALTER TABLE dbo.FACTIBILIDAD ADD CONSTRAINT PK_FACTIBILIDAD PRIMARY KEY (ID_FACTIBILIDAD);
+ALTER TABLE dbo.FACTIBILIDAD ADD CONSTRAINT FK_FACTIBILIDAD_CLIENTE FOREIGN KEY (ID_CLIENTE) REFERENCES dbo.CLIENTE(ID_CLIENTE);
+ALTER TABLE dbo.FACTIBILIDAD ADD CONSTRAINT FK_FACTIBILIDAD_ESTADO FOREIGN KEY (ID_ESTADO_FACTIBILIDAD) REFERENCES dbo.ESTADOFACTIBILIDAD(ID_ESTADO_FACTIBILIDAD);
+
+-- Restricciones para la tabla AUTORIZACION
+PRINT 'Añadiendo restricciones a AUTORIZACION...';
+ALTER TABLE dbo.AUTORIZACION ADD CONSTRAINT PK_AUTORIZACION PRIMARY KEY (ID_AUTORIZACION);
+ALTER TABLE dbo.AUTORIZACION ADD CONSTRAINT UQ_AUTORIZACION_NOMBRE UNIQUE (NOMBRE_AUTORIZACION);
+
+-- Restricciones para la tabla ASIGNACIONROLAUTORIZACION
+PRINT 'Añadiendo restricciones a ASIGNACIONROLAUTORIZACION...';
+ALTER TABLE dbo.ASIGNACIONROLAUTORIZACION ADD CONSTRAINT PK_ASIGNACIONROLAUTORIZACION PRIMARY KEY (ID_ASIGNACION);
+ALTER TABLE dbo.ASIGNACIONROLAUTORIZACION ADD CONSTRAINT UQ_ASIGNACION_ROL_AUTORIZACION UNIQUE (ID_ROL, ID_AUTORIZACION); -- Clave única compuesta
+ALTER TABLE dbo.ASIGNACIONROLAUTORIZACION ADD CONSTRAINT FK_ASIGNACION_ROL FOREIGN KEY (ID_ROL) REFERENCES dbo.ROL(ID_ROL);
+ALTER TABLE dbo.ASIGNACIONROLAUTORIZACION ADD CONSTRAINT FK_ASIGNACION_AUTORIZACION FOREIGN KEY (ID_AUTORIZACION) REFERENCES dbo.AUTORIZACION(ID_AUTORIZACION);
+
+PRINT '--- Creación de Restricciones Completada ---';
+PRINT '--- Script Finalizado Exitosamente ---';

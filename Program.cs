@@ -1,5 +1,8 @@
 using ProtelAppT.Components;
 using MudBlazor.Services;
+using Microsoft.EntityFrameworkCore;
+using ProtelAppT.Data;
+using ProtelAppT.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddMudServices();
+builder.Services.AddDbContext<ProtelDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<UsuarioService>();
 
 var app = builder.Build();
 
