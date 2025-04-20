@@ -197,5 +197,30 @@ ALTER TABLE dbo.ASIGNACIONROLAUTORIZACION ADD CONSTRAINT UQ_ASIGNACION_ROL_AUTOR
 ALTER TABLE dbo.ASIGNACIONROLAUTORIZACION ADD CONSTRAINT FK_ASIGNACION_ROL FOREIGN KEY (ID_ROL) REFERENCES dbo.ROL(ID_ROL);
 ALTER TABLE dbo.ASIGNACIONROLAUTORIZACION ADD CONSTRAINT FK_ASIGNACION_AUTORIZACION FOREIGN KEY (ID_AUTORIZACION) REFERENCES dbo.AUTORIZACION(ID_AUTORIZACION);
 
+
+-- Insertar roles (primero, para cumplir con la clave foránea)
+-- Roles: 1 = Administrador, 2 = Editor, 3 = Lector
+INSERT INTO ROL (ID_ROL, NOMBRE) VALUES (1, 'Administrador');
+INSERT INTO ROL (ID_ROL, NOMBRE) VALUES (2, 'Editor');
+INSERT INTO ROL (ID_ROL, NOMBRE) VALUES (3, 'Lector');
+
+-- Insertar usuarios fijos
+-- Usuario Administrador
+INSERT INTO USUARIO (CORREO, NOMBRE, PASSWORD_HASH, ID_ROL)
+VALUES ('admin@protel.com', 'Administrador Protel', '$2a$11$etJqbAUK.eUsV1wfdZeYgufRrqaxo03ofjzaZ4Z3pk1wnghNGSche', 1); -- clave admin123
+
+-- Usuario Editor
+INSERT INTO USUARIO (CORREO, NOMBRE, PASSWORD_HASH, ID_ROL)
+VALUES ('editor@protel.com', 'Editor Protel', '$2a$11$kz09aepVaT3Y6sL1ZuaAxewJ.a1QdQTz6BFmH/5F1RhsF3gE6TVcW', 2); --clave editor123
+
+-- Usuario Lector
+INSERT INTO USUARIO (CORREO, NOMBRE, PASSWORD_HASH, ID_ROL)
+VALUES ('lector@protel.com', 'Lector Protel', '$2a$11$vWKQg1lcSyuAUBfnL8X5UO/kbnaDku6nRSvjdeN2sTnWQyUMx3fNe', 3);-- clave lector123
+
+-- Verificar que se insertaron los datos (opcional)
+SELECT * FROM USUARIO;
+
 PRINT '--- Creación de Restricciones Completada ---';
 PRINT '--- Script Finalizado Exitosamente ---';
+
+
