@@ -1,0 +1,84 @@
+﻿<h3>CrearUser</h3>
+@page "/clientes/nuevo"
+@using MudBlazor
+@using MudBlazor.Services
+@using ProtelAppT.Service
+
+<MudText Typo="Typo.h4" Class="mb-4">Nuevo Cliente</MudText>
+
+<MudPaper Class="pa-4">
+    <MudForm @ref="_form" @bind-IsValid="@_success" @bind-IsDirty="@_isDirty">
+        <MudGrid Spacing="4">
+            <MudItem xs="12" sm="6">
+                <MudTextField Label="Nombre" @bind-Value="cliente.Nombre" For="@(() => cliente.Nombre)" Variant="Variant.Outlined" Required="true" RequiredError="El nombre es obligatorio" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField Label="Dirección" @bind-Value="cliente.Direccion" For="@(() => cliente.Direccion)" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField Label="Teléfono" @bind-Value="cliente.Telefono" For="@(() => cliente.Telefono)" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField Label="Email" @bind-Value="cliente.Email" For="@(() => cliente.Email)" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect Label="Estado del Cliente" @bind-Value="cliente.IdEstadoCliente" For="@(() => cliente.IdEstadoCliente)" Variant="Variant.Outlined" Required="true" RequiredError="El estado es obligatorio">
+                    @foreach (var estado in estadosCliente)
+                    {
+                        <MudSelectItem Value="@estado.ID_ESTADO_CLIENTE">@estado.NOMBRE</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12" Class="d-flex justify-end">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mr-2" OnClick="Submit">Guardar</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Reset">Cancelar</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudForm>
+</MudPaper>
+
+@code {
+    private MudForm _form;
+    private bool _success;
+    private bool _isDirty;
+
+    private Cliente cliente = new Cliente();
+    private List<EstadoCliente> estadosCliente = new List<EstadoCliente>(); // Reemplazar con datos reales
+
+    private async Task Submit()
+    {
+        await _form.Validate();
+
+        if (_success)
+        {
+            // Lógica para guardar el cliente en la base de datos
+            // ...
+
+            _navigationManager.NavigateTo("/clientes"); // Redirigir a la lista de clientes
+        }
+    }
+
+    private void Reset()
+    {
+        _form.Reset();
+    }
+
+    public class Cliente
+    {
+        public int ID_CLIENTE { get; set; }
+        public string NOMBRE { get; set; } = "";
+        public string? DIRECCION { get; set; }
+        public string? TELEFONO { get; set; }
+        public string? EMAIL { get; set; }
+        public DateTime FECHA_CREACION { get; set; }
+        public DateTime? FECHA_ACTUALIZACION { get; set; }
+        public int ID_ESTADO_CLIENTE { get; set; }
+    }
+
+    public class EstadoCliente
+    {
+        public int ID_ESTADO_CLIENTE { get; set; }
+        public string NOMBRE { get; set; } = "";
+    }
+}

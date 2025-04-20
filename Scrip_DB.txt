@@ -198,11 +198,33 @@ ALTER TABLE dbo.ASIGNACIONROLAUTORIZACION ADD CONSTRAINT FK_ASIGNACION_ROL FOREI
 ALTER TABLE dbo.ASIGNACIONROLAUTORIZACION ADD CONSTRAINT FK_ASIGNACION_AUTORIZACION FOREIGN KEY (ID_AUTORIZACION) REFERENCES dbo.AUTORIZACION(ID_AUTORIZACION);
 
 
+-- ============================================================================
+-- PARTE 4: Inserción de Datos de Prueba
+-- ============================================================================
+PRINT '--- Iniciando Inserción de Datos de Prueba ---';
+
 -- Insertar roles (primero, para cumplir con la clave foránea)
 -- Roles: 1 = Administrador, 2 = Editor, 3 = Lector
 INSERT INTO ROL (ID_ROL, NOMBRE) VALUES (1, 'Administrador');
 INSERT INTO ROL (ID_ROL, NOMBRE) VALUES (2, 'Editor');
 INSERT INTO ROL (ID_ROL, NOMBRE) VALUES (3, 'Lector');
+
+
+
+-- Insertar estados de cliente
+PRINT 'Insertando datos en ESTADOCLIENTE...';
+INSERT INTO ESTADOCLIENTE (ID_ESTADO_CLIENTE, NOMBRE) VALUES (1, 'Activo');
+INSERT INTO ESTADOCLIENTE (ID_ESTADO_CLIENTE, NOMBRE) VALUES (2, 'Inactivo');
+
+-- Insertar estados de factibilidad (manteniendo los tuyos y agregando más)
+PRINT 'Insertando datos en ESTADOFACTIBILIDAD...';
+INSERT INTO ESTADOFACTIBILIDAD (ID_ESTADO_FACTIBILIDAD, NOMBRE) VALUES (1, 'En estudio');
+INSERT INTO ESTADOFACTIBILIDAD (ID_ESTADO_FACTIBILIDAD, NOMBRE) VALUES (2, 'Aprobado');
+INSERT INTO ESTADOFACTIBILIDAD (ID_ESTADO_FACTIBILIDAD, NOMBRE) VALUES (3, 'Negado');
+INSERT INTO ESTADOFACTIBILIDAD (ID_ESTADO_FACTIBILIDAD, NOMBRE) VALUES (4, 'Pendiente de Revisión');
+INSERT INTO ESTADOFACTIBILIDAD (ID_ESTADO_FACTIBILIDAD, NOMBRE) VALUES (5, 'En Diseño');
+INSERT INTO ESTADOFACTIBILIDAD (ID_ESTADO_FACTIBILIDAD, NOMBRE) VALUES (6, 'Implementado');
+INSERT INTO ESTADOFACTIBILIDAD (ID_ESTADO_FACTIBILIDAD, NOMBRE) VALUES (7, 'Cancelado');
 
 -- Insertar usuarios fijos
 -- Usuario Administrador
@@ -219,6 +241,28 @@ VALUES ('lector@protel.com', 'Lector Protel', '$2a$11$vWKQg1lcSyuAUBfnL8X5UO/kbn
 
 -- Verificar que se insertaron los datos (opcional)
 SELECT * FROM USUARIO;
+
+-- Insertar clientes de ejemplo
+PRINT 'Insertando datos en CLIENTE...';
+INSERT INTO CLIENTE (ID_CLIENTE, NOMBRE, DIRECCION, TELEFONO, EMAIL, ID_ESTADO_CLIENTE) VALUES (1, 'Cliente A', 'Calle Principal 123', '123-456-7890', 'cliente.a@email.com', 1);
+INSERT INTO CLIENTE (ID_CLIENTE, NOMBRE, DIRECCION, TELEFONO, EMAIL, ID_ESTADO_CLIENTE) VALUES (2, 'Cliente B', 'Avenida Secundaria 456', '987-654-3210', 'cliente.b@email.com', 1);
+INSERT INTO CLIENTE (ID_CLIENTE, NOMBRE, DIRECCION, TELEFONO, EMAIL, ID_ESTADO_CLIENTE) VALUES (3, 'Cliente C', 'Carrera Tercera 789', NULL, 'cliente.c@email.com', 2);
+INSERT INTO CLIENTE (ID_CLIENTE, NOMBRE, DIRECCION, TELEFONO, EMAIL, ID_ESTADO_CLIENTE) VALUES (4, 'Municipio X', 'Plaza Central', '555-123-4567', NULL, 1);
+
+-- Insertar estudios de factibilidad de ejemplo
+PRINT 'Insertando datos en FACTIBILIDAD...';
+INSERT INTO FACTIBILIDAD (ID_FACTIBILIDAD, ID_CLIENTE, NOMBRE_PROYECTO, DESCRIPCION, UBICACION, ID_ESTADO_FACTIBILIDAD) VALUES (1, 1, 'Cobertura Barrio Bonito', 'Extensión de red en el barrio Bonito', 'Barrio Bonito, [Ciudad]', 1);
+INSERT INTO FACTIBILIDAD (ID_FACTIBILIDAD, ID_CLIENTE, NOMBRE_PROYECTO, DESCRIPCION, UBICACION, ID_ESTADO_FACTIBILIDAD) VALUES (2, 2, 'Fibra Óptica Zona Industrial', 'Implementación de fibra óptica en la zona industrial', 'Zona Industrial, [Ciudad]', 2);
+INSERT INTO FACTIBILIDAD (ID_FACTIBILIDAD, ID_CLIENTE, NOMBRE_PROYECTO, DESCRIPCION, UBICACION, ID_ESTADO_FACTIBILIDAD) VALUES (3, 3, 'Conexión Rural Vereda Y', 'Estudio para llevar internet a la vereda Y', 'Vereda Y, [Municipio]', 4);
+INSERT INTO FACTIBILIDAD (ID_FACTIBILIDAD, ID_CLIENTE, NOMBRE_PROYECTO, DESCRIPCION, UBICACION, ID_ESTADO_FACTIBILIDAD) VALUES (4, 4, 'Proyecto Conectividad Alcaldía Z', 'Estudio para la conectividad de edificios municipales', 'Alcaldía Z, [Municipio]', 1);
+
+
+
+PRINT '--- Inserción de Datos de Prueba Completada ---';
+
+
+
+
 
 PRINT '--- Creación de Restricciones Completada ---';
 PRINT '--- Script Finalizado Exitosamente ---';
