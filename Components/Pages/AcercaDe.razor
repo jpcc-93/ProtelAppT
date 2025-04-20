@@ -1,0 +1,52 @@
+﻿@page "/acerca-de"
+@using MudBlazor
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudPaper Class="pa-4">
+        <!-- Título -->
+        <MudText Typo="Typo.h4" Class="mb-4" Align="Align.Center">
+            Acerca de Protel Soluciones S.A.S.
+        </MudText>
+
+        <MudDivider Class="mb-4" />
+
+        <!-- Encabezado sección -->
+        <MudText Typo="Typo.h6" Class="mb-2">Información General</MudText>
+
+        <!-- Lista de datos -->
+        <MudList T="string">
+            <MudListItem T="string">
+                <MudText Typo="Typo.body1">
+                    <b>Constitución:</b> Protel Soluciones S.A.S. es una empresa constituida el 19 de abril de 2021.
+                </MudText>
+            </MudListItem>
+            <MudListItem T="string">
+                <MudText Typo="Typo.body1">
+                    <b>Ubicación:</b> Calle 49 #37‑23, Medellín, Antioquia.
+                </MudText>
+            </MudListItem>
+            <MudListItem T="string">
+                <MudText Typo="Typo.body1">
+                    <b>Sector:</b> Actividades de telecomunicaciones alámbricas (Código CIIU 6110).
+                </MudText>
+            </MudListItem>
+            <MudListItem T="string">
+                <MudText Typo="Typo.body1">
+                    <b>Tamaño:</b> Microempresa.
+                </MudText>
+            </MudListItem>
+            <MudListItem T="string">
+                <MudText Typo="Typo.body1">
+                    <b>Forma jurídica:</b> Sociedad por Acciones Simplificada.
+                </MudText>
+            </MudListItem>
+        </MudList>
+
+        <MudDivider Class="mt-4 mb-2" />
+
+        <!-- Pie de página -->
+        <MudText Typo="Typo.caption" Align="Align.Center">
+            © @DateTime.Now.Year Protel Soluciones S.A.S. Todos los derechos reservados.
+        </MudText>
+    </MudPaper>
+</MudContainer>
