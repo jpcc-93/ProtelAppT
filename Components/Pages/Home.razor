@@ -2,20 +2,24 @@
 @using ProtelAppT.Service
 @inject AuthenticationStateService _authServiceState
 @inject NavigationManager _navigationManager
-
+@inject ProtelAppT.Data.ProtelDbContext _dbContext
+@using ProtelAppT.Data
+@using Microsoft.EntityFrameworkCore
+@using MudBlazor.Charts
+@using MudBlazor.Components
 @using MudBlazor
 
-@* @if (!_authServiceState.IsAuthenticated)
+@if (!_authServiceState.IsAuthenticated)
 {
     _navigationManager.NavigateTo("/login");
-} *@
+}
 
 <MudGrid Spacing="4">
     <MudItem xs="12" sm="6" md="4">
         <MudCard>
             <MudCardContent>
                 <MudText Typo="Typo.h6">Clientes Registrados</MudText>
-                <MudText Typo="Typo.h4">45</MudText>
+                <MudText Typo="Typo.h4">@totalClientes</MudText>
                 <MudIcon Class="mt-2" Icon="@Icons.Material.Filled.People" Size="Size.Large" Color="Color.Primary" />
             </MudCardContent>
         </MudCard>
@@ -24,7 +28,7 @@
         <MudCard>
             <MudCardContent>
                 <MudText Typo="Typo.h6">Estudios Activos</MudText>
-                <MudText Typo="Typo.h4">12</MudText>
+                <MudText Typo="Typo.h4">@estudiosActivos</MudText>
                 <MudIcon Class="mt-2" Icon="@Icons.Material.Filled.ListAlt" Size="Size.Large" Color="Color.Secondary" />
             </MudCardContent>
         </MudCard>
@@ -32,8 +36,8 @@
     <MudItem xs="12" sm="12" md="4">
         <MudCard>
             <MudCardContent>
-                <MudText Typo="Typo.h6">Cobertura Total</MudText>
-                <MudText Typo="Typo.h4">75%</MudText>
+                <MudText Typo="Typo.h6">Estudios Totales</MudText>
+                <MudText Typo="Typo.h4">@totalestudios</MudText>
                 <MudIcon Class="mt-2" Icon="@Icons.Material.Filled.Map" Size="Size.Large" Color="Color.Success" />
             </MudCardContent>
         </MudCard>
@@ -55,10 +59,14 @@
                         <MudTh>Fecha</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd DataLabel="Nombre">@context.Nombre</MudTd>
-                        <MudTd DataLabel="Cliente">@context.Cliente</MudTd>
-                        <MudTd DataLabel="Estado">@context.Estado</MudTd>
-                        <MudTd DataLabel="Fecha">@context.Fecha</MudTd>
+                        <MudTd DataLabel="Nombre Proyecto">@context.NombreProyecto</MudTd>
+                        <MudTd DataLabel="Cliente">@context.Cliente?.Nombre</MudTd>
+                        <MudTd DataLabel="Estado">
+                            @*                         <MudChip Color="GetEstadoColor(context.EstadoFactibilidad?.NOMBRE)">
+                            @context.EstadoFactibilidad?.NOMBRE
+                        </MudChip> *@
+                        </MudTd>
+                        <MudTd DataLabel="Fecha Solicitud">@context.FechaSolicitud.ToString("dd/MM/yyyy")</MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudCardContent>
@@ -68,7 +76,13 @@
     <MudItem xs="12" sm="6">
         <MudCard Style="height:300px;">
             <MudCardContent>
-                <MudText Typo="Typo.h6">Gráfico 1</MudText>
+                <MudText Typo="Typo.h5">Distribución de Estudios por Estado</MudText>
+            <MudChart ChartType="ChartType.Pie" Width="400px" Height="400px">
+                <MudSeries Data="@datosGraficaPastel"
+                           Label="@labelsGraficaPastel"
+                           BackgroundColors="@coloresGraficaPastel" />
+                <ChartOptions LegendPosition="OriginBottom" />
+            </MudChart>
             </MudCardContent>
         </MudCard>
     </MudItem>
@@ -82,18 +96,65 @@
 </MudGrid>
 
 @code {
-    private List<EstudioReciente> estudiosRecientes = new List<EstudioReciente>()
-    {
-        new EstudioReciente { Nombre = "Zona Norte", Cliente = "Cooperativa ABC", Estado = "En Proceso", Fecha = "15/04/2025" },
-        new EstudioReciente { Nombre = "Sector Sur", Cliente = "Municipio XYZ", Estado = "Completado", Fecha = "12/04/2025" },
-        new EstudioReciente { Nombre = "Área Rural 4", Cliente = "Asociación Campesina", Estado = "Pendiente", Fecha = "16/04/2025" }
-    };
+    private int totalClientes;
+    private int estudiosActivos;
+    private int totalestudios;
+    private List<Factibilidad> estudiosRecientes; 
+    private List<double> datosGraficaPastel = new List<double>();
+    private List<string> labelsGraficaPastel = new List<string>();
+    private List<string> coloresGraficaPastel = new List<string>();
 
-    public class EstudioReciente
+
+    protected override async Task OnInitializedAsync()
     {
-        public string Nombre { get; set; }
-        public string Cliente { get; set; }
-        public string Estado { get; set; }
-        public string Fecha { get; set; }
+        // Obtener el total de clientes activos
+        totalClientes = await _dbContext.CLIENTE.CountAsync(); 
+
+        // Obtener el número de estudios activo
+        estudiosActivos = _dbContext.FACTIBILIDAD.Count(f => f.IdEstadoFactibilidad == 1); 
+
+        //total estudios
+        totalestudios = await _dbContext.FACTIBILIDAD.CountAsync();
+
+        // Obtener los estudios de factibilidad más recientes 
+        estudiosRecientes = await _dbContext.FACTIBILIDAD
+                                            .Include(f => f.Cliente) // Incluimos la información del cliente
+                                            .Include(f => f.EstadoFactibilidad) // Incluimos el estado de factibilidad
+                                            .OrderByDescending(f => f.FechaSolicitud)
+                                            .Take(4) // Por ejemplo, obtener los 5 más recientes
+                                            .ToListAsync();
+
+
+
+        var estudiosPorEstado = await _dbContext.FACTIBILIDAD
+                                .GroupBy(f => f.EstadoFactibilidad.Nombre)
+                                .Select(g => new
+                                {
+                                    Estado = g.Key,
+                                    Cantidad = g.Count()
+                                })
+                                .ToListAsync();
+
+                                // Llenar las listas para la gráfica de pastel
+        foreach (var estado in estudiosPorEstado)
+        {
+            datosGraficaPastel.Add(estado.Cantidad);
+            labelsGraficaPastel.Add(estado.Estado);
+            coloresGraficaPastel.Add(GetEstadoColor(estado.Estado).ToString()); // Usar la función GetEstadoColor
+        }
+    }
+    private MudBlazor.Color GetEstadoColor(string estado)
+    {
+        return estado switch
+        {
+            "En estudio" => MudBlazor.Color.Warning,
+            "Aprobado" => MudBlazor.Color.Success,
+            "Negado" => MudBlazor.Color.Error,
+            "Pendiente de Revisión" => MudBlazor.Color.Info,
+            "En Diseño" => MudBlazor.Color.Primary,
+            "Implementado" => MudBlazor.Color.Dark,
+            "Cancelado" => MudBlazor.Color.Default,
+            _ => MudBlazor.Color.Secondary,
+        };
     }
 }
