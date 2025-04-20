@@ -10,17 +10,17 @@ namespace ProtelAppT.Data
         public int IdCliente { get; set; }
 
         [Required]
-        [StringLength(100)]
+        //[StringLength(100)]
         [Column("NOMBRE")]
         public string Nombre { get; set; }
 
         [Required]
-        [StringLength(255)]
+        //[StringLength(255)]
         [Column("DIRECCION")]
         public string Direccion { get; set; }
 
         [Required]
-        [StringLength(20)]
+        //[StringLength(20)]
         [Column("TELEFONO")]
         public string Telefono { get; set; }
 
@@ -33,9 +33,9 @@ namespace ProtelAppT.Data
         [Column("FECHA_CREACION")]
         public DateTime FechaCreacion { get; set; }
 
-        [Required]
+        
         [Column("FECHA_ACTUALIZACION")]
-        public DateTime FechaActualizacion { get; set; }
+        public DateTime? FechaActualizacion { get; set; }
 
 
         [Required]
@@ -48,6 +48,9 @@ namespace ProtelAppT.Data
         // Propiedades de navegación para las relaciones con otras tablas.
         public EstadoCliente EstadoCliente { get; set; }
         public ICollection<Factibilidad> Factibilidades { get; set; }
+
+        [NotMapped] // Indica que esta propiedad no se mapea a la base de datos
+        public bool Seleccionado { get; set; }
 
 
 

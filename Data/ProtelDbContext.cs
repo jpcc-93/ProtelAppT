@@ -20,10 +20,22 @@ namespace ProtelAppT.Data
         public DbSet<Autorizacion> AUTORIZACION { get; set; }
         public DbSet<AsignacionRolAutorizacion> ASIGNACIONROLAUTORIZACION { get; set; }
 
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cliente>().HasOne(c => c.EstadoCliente).WithMany(e => e.Clientes).HasForeignKey(c => c.IdEstadoCliente);
+
+            modelBuilder.Entity<Factibilidad>()
+                .HasOne(f => f.Cliente)
+                .WithMany(c => c.Factibilidades) 
+                .HasForeignKey(f => f.IdCliente)
+                .IsRequired(); 
+
+            modelBuilder.Entity<Factibilidad>()
+                .HasOne(f => f.EstadoFactibilidad)
+                .WithMany(e => e.Factibilidades) 
+                .HasForeignKey(f => f.IdEstadoFactibilidad)
+                .IsRequired(); 
         }
     }
 }

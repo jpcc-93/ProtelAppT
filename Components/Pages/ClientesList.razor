@@ -1,0 +1,103 @@
+﻿@page "/clientes"
+@using ProtelAppT.Data
+@using Microsoft.EntityFrameworkCore
+@inject ProtelAppT.Data.ProtelDbContext _dbContext
+@inject NavigationManager _navigationManager
+@inject IDialogService DialogService
+@inject AuthenticationStateService _authServiceState
+@using ProtelAppT.Service
+
+@if (!_authServiceState.IsAuthenticated)
+{
+    _navigationManager.NavigateTo("/login");
+}
+
+<MudText Typo="Typo.h4" Class="mb-4" Align="Align.Center">Gestión de Clientes</MudText>
+
+<MudTable Items="@clientes" @bind-clientesSeleccionados="clientesSeleccionados" Hover="true" ReadOnly="false" Dense="true" Breakpoint="Breakpoint.Sm">
+    <ToolBarContent>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Outlined" OnClick="CrearCliente" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<Cliente, object>(x => x.IdCliente)">ID</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Cliente, object>(x => x.Nombre)">Nombre</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Cliente, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Cliente, object>(x => x.Telefono)">Teléfono</MudTableSortLabel></MudTh>
+        <MudTh>Estado</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="ID">@context.IdCliente</MudTd>
+        <MudTd DataLabel="Nombre">@context.Nombre</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+        <MudTd DataLabel="Teléfono">@context.Telefono</MudTd>
+        <MudTd DataLabel="Estado">@context.EstadoCliente?.Nombre</MudTd>
+        <MudTd>
+            <MudCheckBox @bind-Checked="@context.Seleccionado" T="bool" Color="Color.Primary" />
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
+    </PagerContent>
+</MudTable>
+
+<div class="d-flex justify-end mt-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="ModificarClientesSeleccionados" Class="mr-2" Disabled="@(!clientesSeleccionados.Any())">Modificar</MudButton>
+    <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="EliminarClientesSeleccionados" Disabled="@(!clientesSeleccionados.Any())">Eliminar</MudButton>
+</div>
+
+@code {
+    private List<Cliente> clientes = new List<Cliente>();
+    private HashSet<Cliente> clientesSeleccionados = new HashSet<Cliente>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        clientes = await _dbContext.CLIENTE.Include(c => c.EstadoCliente).ToListAsync();
+        // Agregar una propiedad Seleccionado a cada cliente (esto no se guarda en la base de datos)
+        clientes.ForEach(c => c.Seleccionado = false);
+    }
+
+    private void CrearCliente()
+    {
+        _navigationManager.NavigateTo("/clientes/crear"); // Asume que tienes una página para crear clientes
+    }
+
+    private void ModificarClientesSeleccionados()
+    {
+        if (clientesSeleccionados.Count == 1)
+        {
+            _navigationManager.NavigateTo($"/clientes/editar/{clientesSeleccionados.First().IdCliente}"); // Asume que tienes una página para editar clientes
+        }
+        else if (clientesSeleccionados.Count > 1)
+        {
+            // Lógica para modificar múltiples clientes (opcional, podrías mostrar un diálogo de confirmación o un mensaje de error)
+            Console.WriteLine("No se puede modificar múltiples clientes a la vez.");
+        }
+        else
+        {
+            Console.WriteLine("Ningún cliente seleccionado.");
+        }
+    }
+
+    private async Task EliminarClientesSeleccionados()
+    {
+        if (clientesSeleccionados.Any())
+        {
+            bool? result = await DialogService.ShowMessageBox(
+                "Confirmar Eliminación",
+                $"¿Seguro que quieres eliminar {clientesSeleccionados.Count} clientes?",
+                yesText: "Eliminar",
+                cancelText: "Cancelar");
+
+            if (result == true)
+            {
+                _dbContext.CLIENTE.RemoveRange(clientesSeleccionados);
+                await _dbContext.SaveChangesAsync();
+                clientes.RemoveAll(c => clientesSeleccionados.Contains(c));
+                clientesSeleccionados.Clear();
+                StateHasChanged(); // Actualizar la UI
+            }
+        }
+    }
+}

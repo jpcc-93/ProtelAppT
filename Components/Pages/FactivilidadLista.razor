@@ -1,0 +1,106 @@
+﻿@page "/factibilidades"
+@using ProtelAppT.Data
+@using Microsoft.EntityFrameworkCore
+@inject ProtelAppT.Data.ProtelDbContext _dbContext
+@inject NavigationManager _navigationManager
+@inject IDialogService DialogService
+@inject AuthenticationStateService _authServiceState
+@using ProtelAppT.Service
+
+@if (!_authServiceState.IsAuthenticated)
+{
+    _navigationManager.NavigateTo("/login");
+}
+
+<MudText Typo="Typo.h4" Class="mb-4" Align="Align.Center">Gestión de Factibilidades</MudText>
+
+<MudTable Items="@factibilidades" @bind-factibilidadesSeleccionadas="factibilidadesSeleccionadas" Hover="true" ReadOnly="false" Dense="true" Breakpoint="Breakpoint.Sm">
+    <ToolBarContent>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Outlined" OnClick="CrearFactibilidad" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.IdFactibilidad)">ID</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.NombreProyecto)">Nombre Proyecto</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.Cliente.Nombre)">Cliente</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.EstadoFactibilidad.Nombre)">Estado</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.FechaSolicitud)">Fecha Solicitud</MudTableSortLabel></MudTh>
+        <MudTh>Acciones</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="ID">@context.IdFactibilidad</MudTd>
+        <MudTd DataLabel="Nombre Proyecto">@context.NombreProyecto</MudTd>
+        <MudTd DataLabel="Cliente">@context.Cliente?.Nombre</MudTd>
+        <MudTd DataLabel="Estado">@context.EstadoFactibilidad?.Nombre</MudTd>
+        <MudTd DataLabel="Fecha Solicitud">@context.FechaSolicitud.ToString("dd/MM/yyyy")</MudTd>
+        <MudTd>
+            <MudCheckBox @bind-Checked="@context.Seleccionado" T="bool" Color="Color.Primary" />
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
+    </PagerContent>
+</MudTable>
+
+<div class="d-flex justify-end mt-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="ModificarFactibilidadesSeleccionadas" Class="mr-2" Disabled="@(!factibilidadesSeleccionadas.Any())">Modificar</MudButton>
+    <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="EliminarFactibilidadesSeleccionadas" Disabled="@(!factibilidadesSeleccionadas.Any())">Eliminar</MudButton>
+</div>
+
+@code {
+    private List<Factibilidad> factibilidades = new List<Factibilidad>();
+    private HashSet<Factibilidad> factibilidadesSeleccionadas = new HashSet<Factibilidad>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        factibilidades = await _dbContext.FACTIBILIDAD
+            .Include(f => f.Cliente)
+            .Include(f => f.EstadoFactibilidad)
+            .ToListAsync();
+        // Agregar una propiedad Seleccionado a cada factibilidad
+        factibilidades.ForEach(f => f.Seleccionado = false);
+    }
+
+    private void CrearFactibilidad()
+    {
+        _navigationManager.NavigateTo("/factibilidades/crear"); // Asume que tienes una página para crear factibilidades
+    }
+
+    private void ModificarFactibilidadesSeleccionadas()
+    {
+        if (factibilidadesSeleccionadas.Count == 1)
+        {
+            _navigationManager.NavigateTo($"/factibilidades/editar/{factibilidadesSeleccionadas.First().IdFactibilidad}"); // Asume que tienes una página para editar factibilidades
+        }
+        else if (factibilidadesSeleccionadas.Count > 1)
+        {
+            // Lógica para modificar múltiples factibilidades (opcional, podrías mostrar un diálogo de confirmación o un mensaje de error)
+            Console.WriteLine("No se puede modificar múltiples factibilidades a la vez.");
+        }
+        else
+        {
+            Console.WriteLine("Ninguna factibilidad seleccionada.");
+        }
+    }
+
+    private async Task EliminarFactibilidadesSeleccionadas()
+    {
+        if (factibilidadesSeleccionadas.Any())
+        {
+            bool? result = await DialogService.ShowMessageBox(
+                "Confirmar Eliminación",
+                $"¿Seguro que quieres eliminar {factibilidadesSeleccionadas.Count} factibilidades?",
+                yesText: "Eliminar",
+                cancelText: "Cancelar");
+
+            if (result == true)
+            {
+                _dbContext.FACTIBILIDAD.RemoveRange(factibilidadesSeleccionadas);
+                await _dbContext.SaveChangesAsync();
+                factibilidades.RemoveAll(f => factibilidadesSeleccionadas.Contains(f));
+                factibilidadesSeleccionadas.Clear();
+                StateHasChanged(); // Actualizar la UI
+            }
+        }
+    }
+}

@@ -15,16 +15,16 @@ namespace ProtelAppT.Data
         public int IdCliente { get; set; }
 
         [Required]
-        [StringLength(200)]
+        //[StringLength(200)]
         [Column("NOMBRE_PROYECTO")]
         public string NombreProyecto { get; set; }
 
-        [StringLength(255)]
+        //[StringLength(255)]
         [Column("DESCRIPCION")]
         public string Descripcion { get; set; }
 
         [Required]
-        [StringLength(255)]
+        //[StringLength(255)]
         [Column("UBICACION")]
         public string Ubicacion { get; set; }
 
@@ -42,6 +42,9 @@ namespace ProtelAppT.Data
         // Propiedades de navegación para las relaciones con otras tablas
         public Cliente Cliente { get; set; }
         public EstadoFactibilidad EstadoFactibilidad { get; set; }
+
+        [NotMapped]
+        public bool Seleccionado { get; set; }
 
     }
 }
