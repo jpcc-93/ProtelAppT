@@ -1,5 +1,11 @@
 ﻿@page "/login"
 @using MudBlazor
+@using ProtelAppT.Service
+@inject UsuarioService _authService
+@inject IHttpContextAccessor _httpContextAccessor
+@inject NavigationManager _navigationManager
+@using System.Security.Claims;
+@inject AuthenticationStateService _authServiceState
 
 <MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center" Style="background-color:#f0f2f5; height:100vh;">
 
@@ -31,15 +37,35 @@
     private string email;
     private string password;
     private string errorMessage;
-
-    private void IniciarSesion()
+    
+    protected override void OnInitialized()
     {
-        // Aquí irá la lógica para verificar el correo y la contraseña
-        // y realizar la autenticación. Por ahora, solo mostramos un mensaje.
-        if (email == "usuario@ejemplo.com" && password == "contrasena")
+        base.OnInitialized();
+        errorMessage = ""; // Inicializa errorMessage para evitar nulls
+    }
+
+    private async Task IniciarSesion()
+    {
+
+        var user = await _authService.AuthenticateUser(email, password);
+        
+        if (user != null)
+
         {
-            errorMessage = "¡Inicio de sesión exitoso!";
+            // Crear el ClaimsPrincipal
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Correo, ClaimValueTypes.String),
+               //pendiente agregar rol
+            };
+            var identity = new ClaimsIdentity(claims, "ProtelAuth");
+            var principal = new ClaimsPrincipal(identity);
+
+            // Notificar al servicio de autenticación
+            _authServiceState.Login(principal);
+
             // Aquí podrías redirigir al usuario a la página principal.
+            _navigationManager.NavigateTo("/");
         }
         else
         {

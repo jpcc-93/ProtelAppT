@@ -26,5 +26,16 @@ namespace ProtelAppT.Service
                 throw;
             }
         }
+        public async Task<Usuario> AuthenticateUser(string email, string password)
+        {
+            var user = await _context.USUARIO.FirstOrDefaultAsync(u => u.Correo == email);
+
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            {
+                return user; // Credenciales válidas
+            }
+
+            return null; // Credenciales inválidas o usuario no encontrado
+        }
     }
 }

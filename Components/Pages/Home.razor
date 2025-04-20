@@ -1,6 +1,14 @@
 ﻿@page "/"
+@using ProtelAppT.Service
+@inject AuthenticationStateService _authServiceState
+@inject NavigationManager _navigationManager
 
 @using MudBlazor
+
+@* @if (!_authServiceState.IsAuthenticated)
+{
+    _navigationManager.NavigateTo("/login");
+} *@
 
 <MudGrid Spacing="4">
     <MudItem xs="12" sm="6" md="4">

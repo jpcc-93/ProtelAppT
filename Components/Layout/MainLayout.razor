@@ -10,11 +10,45 @@
     @if (NavigationManager.Uri != NavigationManager.BaseUri + "login")
     {<MudAppBar>
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        My Application
+        PROTEL
+            <MudSpacer/>
+            <MudMenu Dense
+                     Variant="Variant.Text"
+                     Size="Size.Medium"
+                     Color="Color.Inherit"
+                     Icon="@Icons.Material.TwoTone.MoreVert">
+
+                <MudMenu StartIcon="@Icons.Material.TwoTone.Settings"
+                         IconColor="Color.Primary"
+                         Label="Settings">
+                    <MudMenuItem Icon="@Icons.Material.TwoTone.DarkMode"
+                                 IconColor="Color.Secondary"
+                                 Label="Dark Theme" />
+                </MudMenu>
+
+
+                <MudDivider />
+
+                <MudMenuItem Href="/"
+                             ForceLoad
+                             Icon="@Icons.Material.TwoTone.Login"
+                             IconColor="Color.Primary"
+                             Label="Sign In" />
+
+                <MudMenuItem Href="/"
+                             ForceLoad
+                             Icon="@Icons.Material.TwoTone.Logout"
+                             IconColor="Color.Primary"
+                             Label="Sign Out" />
+            </MudMenu>
+            <MudIconButton Icon="@Icons.Material.Outlined.PeopleAlt" Color="Color.Inherit" />
     </MudAppBar>
 
-    <MudDrawer @bind-Open="@_drawerOpen">
-        <MyNavMenu/>
+    <MudDrawer @bind-Open="@_drawerOpen"
+                   Color="Color.Primary"
+                   Variant="DrawerVariant.Responsive"
+                   Breakpoint="Breakpoint.Md">
+        <NavMenu/>
     </MudDrawer>}
     
     <MudMainContent>
