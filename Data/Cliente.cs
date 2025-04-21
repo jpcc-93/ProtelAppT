@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProtelAppT.Data
 {
+    [Table("CLIENTE")]
     public class Cliente
     {
         [Key]
@@ -10,17 +11,17 @@ namespace ProtelAppT.Data
         public int IdCliente { get; set; }
 
         [Required]
-        //[StringLength(100)]
+        [StringLength(100)]
         [Column("NOMBRE")]
         public string Nombre { get; set; }
 
         [Required]
-        //[StringLength(255)]
+        [StringLength(255)]
         [Column("DIRECCION")]
         public string Direccion { get; set; }
 
         [Required]
-        //[StringLength(20)]
+        [StringLength(20)]
         [Column("TELEFONO")]
         public string Telefono { get; set; }
 
@@ -51,9 +52,6 @@ namespace ProtelAppT.Data
 
         [NotMapped] // Indica que esta propiedad no se mapea a la base de datos
         public bool Seleccionado { get; set; }
-
-
-
 
 
     }
