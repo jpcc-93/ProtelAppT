@@ -7,10 +7,13 @@
 @inject IDialogService DialogService
 @using ProtelAppT.Service
 
-<MudPaper Class="pa-4 mx-auto" MaxWidth="600px" Elevation="4">
+<MudPaper Class="pa-6 mt-10 mx-auto rounded elevation-8" MaxWidth="600px"
+          Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+
     <MudText Typo="Typo.h5" Class="mb-4">Registrar Nuevo Cliente</MudText>
 
     <EditForm Model="@cliente" OnValidSubmit="GuardarCliente">
+        <ValidationSummary />
         <DataAnnotationsValidator />
         <MudGrid>
             <MudItem xs="12">
@@ -39,11 +42,14 @@
             </MudItem>
 
             <MudItem xs="12">
-                <MudButton Type="Submit" Color="Color.Primary" Variant="Variant.Filled">Guardar</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled">
+                    Guardar
+                </MudButton>
             </MudItem>
         </MudGrid>
     </EditForm>
 </MudPaper>
+
 
 @code {
     private Cliente cliente = new Cliente();
