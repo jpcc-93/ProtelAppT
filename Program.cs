@@ -18,6 +18,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AuthenticationStateService>();
 builder.Services.AddDistributedMemoryCache();
+builder.Services.AddScoped<ClienteService>();
 
 var app = builder.Build();
 
