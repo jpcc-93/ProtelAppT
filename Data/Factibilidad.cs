@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProtelAppT.Data
 {
+    [Table("FACTIBILIDAD")]
     public class Factibilidad
     {
         [Key]
