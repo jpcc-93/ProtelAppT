@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Components;
 
 namespace ProtelAppT.Data
 {
@@ -7,6 +8,7 @@ namespace ProtelAppT.Data
     public class Factibilidad
     {
         [Key]
+        [Parameter]
         [Column("ID_FACTIBILIDAD")]
         public int IdFactibilidad { get; set; }
 

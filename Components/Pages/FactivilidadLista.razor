@@ -74,7 +74,8 @@
     {
         if (factibilidadesSeleccionadas.Count == 1)
         {
-            _navigationManager.NavigateTo($"/factibilidades-edit{factibilidadesSeleccionadas.First().IdFactibilidad}");
+            var id = factibilidadesSeleccionadas.First().IdFactibilidad;
+            _navigationManager.NavigateTo($"/factibilidades-edit/{id}");
         }
         else if (factibilidadesSeleccionadas.Count > 1)
         {
@@ -82,9 +83,10 @@
         }
         else
         {
-            Console.WriteLine("Porfavor selecciona algo para modificar.");
+            Console.WriteLine("Por favor selecciona una factibilidad para modificar.");
         }
     }
+
 
     private async Task EliminarFactibilidadesSeleccionadas()
     {

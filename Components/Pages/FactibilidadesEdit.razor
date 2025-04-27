@@ -1,0 +1,120 @@
+﻿@page "/factibilidades-edit/{IdFactibilidad:int}"
+@using ProtelAppT.Data
+@using Microsoft.EntityFrameworkCore
+@inject ProtelDbContext _dbContext
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-4 mx-auto mt-10" MaxWidth="700px" Elevation="6"
+Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+    <MudText Typo="Typo.h5" Class="mb-4">Editar Factibilidad</MudText>
+
+    @if (factibilidad == null)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <EditForm Model="@factibilidad" OnValidSubmit="GuardarCambios">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudSelect T="int" Label="Cliente" @bind-Value="factibilidad.IdCliente" Required="true">
+                        @foreach (var cliente in clientes)
+                        {
+                            <MudSelectItem Value="@cliente.IdCliente">@cliente.Nombre</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Nombre del Proyecto" @bind-Value="factibilidad.NombreProyecto" Required="true" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Descripción" @bind-Value="factibilidad.Descripcion" Lines="3" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Ubicación" @bind-Value="factibilidad.Ubicacion" Required="true" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudSelect T="int" Label="Estado de Factibilidad" @bind-Value="factibilidad.IdEstadoFactibilidad" Required="true">
+                        @foreach (var estado in estados)
+                        {
+                            <MudSelectItem Value="@estado.IdEstadoFactibilidad">@estado.Nombre</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudButton Type="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Guardar Cambios</MudButton>
+                    <MudButton Class="ml-2" Variant="Variant.Outlined" Color="Color.Default" OnClick="@Cancelar">Cancelar</MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    }
+</MudPaper>
+
+@code {
+    [Parameter]
+    public int IdFactibilidad { get; set; }
+
+    private Factibilidad factibilidad;
+    private List<Cliente> clientes = new();
+    private List<EstadoFactibilidad> estados = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            factibilidad = await _dbContext.FACTIBILIDAD
+                .Include(f => f.Cliente)
+                .Include(f => f.EstadoFactibilidad)
+                .FirstOrDefaultAsync(f => f.IdFactibilidad == IdFactibilidad);
+
+            if (factibilidad == null)
+            {
+                DialogResult.Ok("Factibilidad no encontrada.");
+                Nav.NavigateTo("/factibilidades");
+                return;
+            }
+
+            clientes = await _dbContext.CLIENTE.ToListAsync();
+            estados = await _dbContext.ESTADOFACTIBILIDAD.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar: {ex.Message}");
+        }
+    }
+
+    private async Task GuardarCambios()
+    {
+        try
+        {
+            factibilidad.FechaRespuesta = DateTime.Now; // 👈🏼 Aquí actualizas la fecha al momento de guardar
+
+            _dbContext.FACTIBILIDAD.Update(factibilidad);
+            await _dbContext.SaveChangesAsync();
+
+            Snackbar.Add("Factibilidad actualizada exitosamente.", Severity.Success);
+            Nav.NavigateTo("/factibilidades");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al guardar cambios: {ex.Message}", Severity.Error);
+        }
+
+    }
+
+
+    private void Cancelar()
+    {
+        Nav.NavigateTo("/factibilidades");
+    }
+}
