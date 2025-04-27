@@ -14,37 +14,42 @@
 
 <MudText Typo="Typo.h4" Class="mb-4" Align="Align.Center">Gestión de Factibilidades</MudText>
 
-<MudTable Items="@factibilidades" @bind-factibilidadesSeleccionadas="factibilidadesSeleccionadas" Hover="true" ReadOnly="false" Dense="true" Breakpoint="Breakpoint.Sm">
+
+<MudTable Items="@factibilidades"
+          @bind-SelectedItems="factibilidadesSeleccionadas"
+          MultiSelection="true"
+          Hover="true"
+          Dense="true"
+          Breakpoint="Breakpoint.Sm">
     <ToolBarContent>
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Outlined" OnClick="CrearFactibilidad" />
     </ToolBarContent>
     <HeaderContent>
-        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.IdFactibilidad)">ID</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.NombreProyecto)">Nombre Proyecto</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.Cliente.Nombre)">Cliente</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.EstadoFactibilidad.Nombre)">Estado</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Factibilidad, object>(x => x.FechaSolicitud)">Fecha Solicitud</MudTableSortLabel></MudTh>
-        <MudTh>Acciones</MudTh>
+        <MudTh>ID</MudTh>
+        <MudTh>Nombre Proyecto</MudTh>
+        <MudTh>Cliente</MudTh>
+        <MudTh>Estado</MudTh>
+        <MudTh>Fecha Solicitud</MudTh>
+        <MudTh>Seleccionar</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="ID">@context.IdFactibilidad</MudTd>
-        <MudTd DataLabel="Nombre Proyecto">@context.NombreProyecto</MudTd>
-        <MudTd DataLabel="Cliente">@context.Cliente?.Nombre</MudTd>
-        <MudTd DataLabel="Estado">@context.EstadoFactibilidad?.Nombre</MudTd>
-        <MudTd DataLabel="Fecha Solicitud">@context.FechaSolicitud.ToString("dd/MM/yyyy")</MudTd>
-        <MudTd>
-            <MudCheckBox @bind-Checked="@context.Seleccionado" T="bool" Color="Color.Primary" />
-        </MudTd>
+        <MudTd>@context.IdFactibilidad</MudTd>
+        <MudTd>@context.NombreProyecto</MudTd>
+        <MudTd>@context.Cliente?.Nombre</MudTd>
+        <MudTd>@context.EstadoFactibilidad?.Nombre</MudTd>
+        <MudTd>@context.FechaSolicitud.ToString("dd/MM/yyyy")</MudTd>
+        <MudTd></MudTd> 
     </RowTemplate>
     <PagerContent>
         <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
     </PagerContent>
 </MudTable>
 
+
 <div class="d-flex justify-end mt-4">
     <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="ModificarFactibilidadesSeleccionadas" Class="mr-2" Disabled="@(!factibilidadesSeleccionadas.Any())">Modificar</MudButton>
-    <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="EliminarFactibilidadesSeleccionadas" Disabled="@(!factibilidadesSeleccionadas.Any())">Eliminar</MudButton>
+    <MudButton Color="Color.Error " Variant="Variant.Filled" OnClick="EliminarFactibilidadesSeleccionadas" Disabled="@(!factibilidadesSeleccionadas.Any())">Eliminar</MudButton> 
 </div>
 
 @code {
@@ -57,29 +62,27 @@
             .Include(f => f.Cliente)
             .Include(f => f.EstadoFactibilidad)
             .ToListAsync();
-        // Agregar una propiedad Seleccionado a cada factibilidad
-        factibilidades.ForEach(f => f.Seleccionado = false);
+        
     }
 
     private void CrearFactibilidad()
     {
-        _navigationManager.NavigateTo("/factibilidades/crear"); // Asume que tienes una página para crear factibilidades
+        _navigationManager.NavigateTo("/estudios-add"); 
     }
 
     private void ModificarFactibilidadesSeleccionadas()
     {
         if (factibilidadesSeleccionadas.Count == 1)
         {
-            _navigationManager.NavigateTo($"/factibilidades/editar/{factibilidadesSeleccionadas.First().IdFactibilidad}"); // Asume que tienes una página para editar factibilidades
+            _navigationManager.NavigateTo($"/factibilidades-edit{factibilidadesSeleccionadas.First().IdFactibilidad}");
         }
         else if (factibilidadesSeleccionadas.Count > 1)
         {
-            // Lógica para modificar múltiples factibilidades (opcional, podrías mostrar un diálogo de confirmación o un mensaje de error)
             Console.WriteLine("No se puede modificar múltiples factibilidades a la vez.");
         }
         else
         {
-            Console.WriteLine("Ninguna factibilidad seleccionada.");
+            Console.WriteLine("Porfavor selecciona algo para modificar.");
         }
     }
 

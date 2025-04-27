@@ -44,8 +44,8 @@ namespace ProtelAppT.Data
         public Cliente Cliente { get; set; }
         public EstadoFactibilidad EstadoFactibilidad { get; set; }
 
-        [NotMapped]
-        public bool Seleccionado { get; set; }
+        //[NotMapped]
+        //public bool Seleccionado { get; set; }
 
     }
 }
