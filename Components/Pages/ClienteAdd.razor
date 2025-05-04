@@ -65,16 +65,16 @@
         Console.WriteLine("===> Entrando a GuardarCliente");
         try
         {
-            var ultimoId = await _dbContext.CLIENTE
-                .OrderByDescending(c => c.IdCliente)
-                .Select(c => c.IdCliente)
-                .FirstOrDefaultAsync();
+            // var ultimoId = await _dbContext.CLIENTE
+            //     .OrderByDescending(c => c.IdCliente)
+            //     .Select(c => c.IdCliente)
+            //     .FirstOrDefaultAsync();
 
-            cliente.IdCliente = ultimoId + 1;
+            // cliente.IdCliente = ultimoId + 1;
             cliente.FechaCreacion = DateTime.Now;
             cliente.FechaActualizacion = DateTime.Now;
 
-            Console.WriteLine($"Último ID encontrado: {ultimoId}");
+            // Console.WriteLine($"Último ID encontrado: {ultimoId}");
 
             Console.WriteLine($"Datos del cliente a guardar: {cliente.Nombre}, {cliente.Email}");
 
