@@ -6,6 +6,7 @@
 @inject IDialogService DialogService
 @inject AuthenticationStateService _authServiceState
 @using ProtelAppT.Service
+@inject ISnackbar Snackbar
 
 @if (!_authServiceState.IsAuthenticated)
 {
@@ -79,12 +80,8 @@
         }
         else if (factibilidadesSeleccionadas.Count > 1)
         {
-            Console.WriteLine("No se puede modificar múltiples factibilidades a la vez.");
-        }
-        else
-        {
-            Console.WriteLine("Por favor selecciona una factibilidad para modificar.");
-        }
+            Snackbar.Add("Selecciona solo una factibilidad para editar.", Severity.Warning);
+        }       
     }
 
 

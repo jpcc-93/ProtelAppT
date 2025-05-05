@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ProtelAppT.Data;
 using ProtelAppT.Service;
 using Microsoft.AspNetCore.Http;
+using ProtelAppT.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddMudServices();
 builder.Services.AddDbContext<ProtelDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IGenericRepository, GenericRepository>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UsuarioService>();

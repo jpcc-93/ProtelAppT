@@ -1,28 +1,29 @@
-﻿@page "/factibilidades-edit/{IdFactibilidad:int}"
-@using ProtelAppT.Data
-@using Microsoft.EntityFrameworkCore
-@inject ProtelDbContext _dbContext
-@inject NavigationManager Nav
+﻿
+@page "/factibilidades-edit/{Id:int}"
+@inherits ProtelAppT.Service.CrudComponentBase<Factibilidad>
+@inject IGenericRepository Repo
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@using ProtelAppT.Repositories
+@using ProtelAppT.Data
 
 <MudPaper Class="pa-4 mx-auto mt-10" MaxWidth="700px" Elevation="6"
-Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+          Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
     <MudText Typo="Typo.h5" Class="mb-4">Editar Factibilidad</MudText>
 
-    @if (factibilidad == null)
+    @if (Entity == null)
     {
         <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
     }
     else
     {
-        <EditForm Model="@factibilidad" OnValidSubmit="GuardarCambios">
+        <EditForm Model="Entity" OnValidSubmit="GuardarExtendido">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
             <MudGrid>
                 <MudItem xs="12">
-                    <MudSelect T="int" Label="Cliente" @bind-Value="factibilidad.IdCliente" Required="true">
+                    <MudSelect T="int" Label="Cliente" @bind-Value="Entity.IdCliente" Required="true">
                         @foreach (var cliente in clientes)
                         {
                             <MudSelectItem Value="@cliente.IdCliente">@cliente.Nombre</MudSelectItem>
@@ -31,19 +32,19 @@ Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
                 </MudItem>
 
                 <MudItem xs="12">
-                    <MudTextField Label="Nombre del Proyecto" @bind-Value="factibilidad.NombreProyecto" Required="true" />
+                    <MudTextField Label="Nombre del Proyecto" @bind-Value="Entity.NombreProyecto" Required="true" />
                 </MudItem>
 
                 <MudItem xs="12">
-                    <MudTextField Label="Descripción" @bind-Value="factibilidad.Descripcion" Lines="3" />
+                    <MudTextField Label="Descripción" @bind-Value="Entity.Descripcion" Lines="3" />
                 </MudItem>
 
                 <MudItem xs="12">
-                    <MudTextField Label="Ubicación" @bind-Value="factibilidad.Ubicacion" Required="true" />
+                    <MudTextField Label="Ubicación" @bind-Value="Entity.Ubicacion" Required="true" />
                 </MudItem>
 
                 <MudItem xs="12">
-                    <MudSelect T="int" Label="Estado de Factibilidad" @bind-Value="factibilidad.IdEstadoFactibilidad" Required="true">
+                    <MudSelect T="int" Label="Estado de Factibilidad" @bind-Value="Entity.IdEstadoFactibilidad" Required="true">
                         @foreach (var estado in estados)
                         {
                             <MudSelectItem Value="@estado.IdEstadoFactibilidad">@estado.Nombre</MudSelectItem>
@@ -52,8 +53,8 @@ Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
                 </MudItem>
 
                 <MudItem xs="12">
-                    <MudButton buttonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Guardar Cambios</MudButton>
-                    <MudButton Class="ml-2" Variant="Variant.Outlined" Color="Color.Default" OnClick="@Cancelar">Cancelar</MudButton>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Guardar Cambios</MudButton>
+                    <MudButton Class="ml-2" Variant="Variant.Outlined" OnClick="Cancel" Color="Color.Default">Cancelar</MudButton>
                 </MudItem>
             </MudGrid>
         </EditForm>
@@ -61,60 +62,29 @@ Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
 </MudPaper>
 
 @code {
-    [Parameter]
-    public int IdFactibilidad { get; set; }
-
-    private Factibilidad factibilidad;
     private List<Cliente> clientes = new();
     private List<EstadoFactibilidad> estados = new();
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            factibilidad = await _dbContext.FACTIBILIDAD
-                .Include(f => f.Cliente)
-                .Include(f => f.EstadoFactibilidad)
-                .FirstOrDefaultAsync(f => f.IdFactibilidad == IdFactibilidad);
+        await base.OnInitializedAsync();
 
-            if (factibilidad == null)
-            {
-                DialogResult.Ok("Factibilidad no encontrada.");
-                Nav.NavigateTo("/factibilidades");
-                return;
-            }
-
-            clientes = await _dbContext.CLIENTE.ToListAsync();
-            estados = await _dbContext.ESTADOFACTIBILIDAD.ToListAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error al cargar: {ex.Message}");
-        }
+        clientes = await Repo.GetAllAsync<Cliente>();
+        estados = await Repo.GetAllAsync<EstadoFactibilidad>();
     }
 
-    private async Task GuardarCambios()
+    private async Task GuardarExtendido()
     {
-        try
-        {
-            factibilidad.FechaRespuesta = DateTime.Now; // 👈🏼 Aquí actualizas la fecha al momento de guardar
+        
+        Entity.FechaRespuesta = DateTime.Now;
 
-            _dbContext.FACTIBILIDAD.Update(factibilidad);
-            await _dbContext.SaveChangesAsync();
-
-            Snackbar.Add("Factibilidad actualizada exitosamente.", Severity.Success);
-            Nav.NavigateTo("/factibilidades");
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error al guardar cambios: {ex.Message}", Severity.Error);
-        }
-
+        await Save(); // Llama al método heredado de la clase base
+        Snackbar.Add("Factibilidad actualizada exitosamente.", Severity.Success);
     }
 
-
-    private void Cancelar()
+    private void Cancel()
     {
         Nav.NavigateTo("/factibilidades");
     }
+
 }

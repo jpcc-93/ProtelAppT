@@ -1,24 +1,22 @@
 ﻿
 @page "/estudios-add"
+@inherits ProtelAppT.Service.CrudComponentBase<Factibilidad>
+@inject IGenericRepository Repo
+@inject ISnackbar Snackbar
 @using ProtelAppT.Data
-@using Microsoft.EntityFrameworkCore
-@inject ProtelDbContext _dbContext
-@inject NavigationManager Nav
-@inject IDialogService DialogService
-@using ProtelAppT.Service
-
+@using ProtelAppT.Repositories
 
 <MudPaper Class="pa-4 mx-auto mt-10" MaxWidth="700px" Elevation="6"
           Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
     <MudText Typo="Typo.h5" Class="mb-4">Registrar Nueva Petición de Factibilidad</MudText>
 
-    <EditForm Model="@factibilidad" OnValidSubmit="GuardarFactibilidad">
+    <EditForm Model="Entity" OnValidSubmit="GuardarExtendido">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
         <MudGrid>
             <MudItem xs="12">
-                <MudSelect T="int" Label="Cliente" @bind-Value="factibilidad.IdCliente" Required="true">
+                <MudSelect T="int" Label="Cliente" @bind-Value="Entity.IdCliente" Required="true">
                     @foreach (var cliente in clientes)
                     {
                         <MudSelectItem Value="@cliente.IdCliente">@cliente.Nombre</MudSelectItem>
@@ -27,20 +25,19 @@
             </MudItem>
 
             <MudItem xs="12">
-                <MudTextField Label="Nombre del Proyecto" @bind-Value="factibilidad.NombreProyecto" Required="true" />
+                <MudTextField Label="Nombre del Proyecto" @bind-Value="Entity.NombreProyecto" Required="true" />
             </MudItem>
 
             <MudItem xs="12">
-                <MudTextField Label="Descripción" @bind-Value="factibilidad.Descripcion" Lines="3" />
+                <MudTextField Label="Descripción" @bind-Value="Entity.Descripcion" Lines="3" />
             </MudItem>
 
             <MudItem xs="12">
-                <MudTextField Label="Ubicación" @bind-Value="factibilidad.Ubicacion" Required="true" />
+                <MudTextField Label="Ubicación" @bind-Value="Entity.Ubicacion" Required="true" />
             </MudItem>
 
-           
             <MudItem xs="12">
-                <MudSelect T="int" Label="Estado de Factibilidad" @bind-Value="factibilidad.IdEstadoFactibilidad" Required="true">
+                <MudSelect T="int" Label="Estado de Factibilidad" @bind-Value="Entity.IdEstadoFactibilidad" Required="true">
                     @foreach (var estado in estados)
                     {
                         <MudSelectItem Value="@estado.IdEstadoFactibilidad">@estado.Nombre</MudSelectItem>
@@ -55,42 +52,22 @@
     </EditForm>
 </MudPaper>
 
-
 @code {
-    private Factibilidad factibilidad = new();
     private List<Cliente> clientes = new();
     private List<EstadoFactibilidad> estados = new();
 
     protected override async Task OnInitializedAsync()
     {
-        clientes = await _dbContext.CLIENTE.ToListAsync();
-        estados = await _dbContext.ESTADOFACTIBILIDAD.ToListAsync();
-
-        Console.WriteLine($"Clientes cargados: {clientes.Count}");
-        Console.WriteLine($"Estados cargados: {estados.Count}");
+        await base.OnInitializedAsync();
+        clientes = await Repo.GetAllAsync<Cliente>();
+        estados = await Repo.GetAllAsync<EstadoFactibilidad>();
     }
 
-    private async Task GuardarFactibilidad()
+    private async Task GuardarExtendido()
     {
-        try
-        {
-            // Obtener último ID manual si aplica
-            // var ultimoId = await _dbContext.FACTIBILIDAD
-            //     .OrderByDescending(f => f.IdFactibilidad)
-            //     .Select(f => f.IdFactibilidad)
-            //     .FirstOrDefaultAsync();
-
-            // factibilidad.IdFactibilidad = ultimoId + 1;
-            factibilidad.FechaSolicitud = factibilidad.FechaSolicitud == default ? DateTime.Now : factibilidad.FechaSolicitud;
-
-            _dbContext.FACTIBILIDAD.Add(factibilidad);
-            await _dbContext.SaveChangesAsync();
-
-            Nav.NavigateTo("/factibilidades");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error al guardar: {ex.Message}");
-        }
+        Entity.FechaSolicitud = DateTime.Now;
+        await Save(); // De la clase base
+        Snackbar.Add("Factibilidad registrada correctamente.", Severity.Success);
     }
+
 }
