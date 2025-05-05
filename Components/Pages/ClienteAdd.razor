@@ -62,7 +62,6 @@
 
     private async Task GuardarCliente()
     {
-        Console.WriteLine("===> Entrando a GuardarCliente");
         try
         {
             // var ultimoId = await _dbContext.CLIENTE
@@ -73,11 +72,6 @@
             // cliente.IdCliente = ultimoId + 1;
             cliente.FechaCreacion = DateTime.Now;
             cliente.FechaActualizacion = DateTime.Now;
-
-            // Console.WriteLine($"Último ID encontrado: {ultimoId}");
-
-            Console.WriteLine($"Datos del cliente a guardar: {cliente.Nombre}, {cliente.Email}");
-
 
             _dbContext.CLIENTE.Add(cliente);
             await _dbContext.SaveChangesAsync();
