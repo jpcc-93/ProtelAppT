@@ -1,0 +1,84 @@
+﻿@page "/clientes-edit/{Id:int}"
+@inherits ProtelAppT.Service.CrudComponentBase<Cliente>
+@inject IGenericRepository Repo
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@using ProtelAppT.Repositories
+@using ProtelAppT.Data
+
+
+<MudPaper Class="pa-4 mx-auto mt-10" MaxWidth="700px" Elevation="6"
+          Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+    <MudText Typo="Typo.h5" Class="mb-4">Editar Cliente</MudText>
+
+    @if (Entity == null)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <EditForm Model="Entity" OnValidSubmit="ActualizarCliente">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudGrid>
+                
+                <MudItem xs="12">
+                    <MudTextField Label="Nombre del cliente" @bind-Value="Entity.Nombre" Required="true" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Dirección" @bind-Value="Entity.Direccion" Lines="3" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Telefono" @bind-Value="Entity.Telefono" Required="true" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Email" @bind-Value="Entity.Email" Required="true" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudSelect T="int" Label="Estado de cliente" @bind-Value="Entity.IdEstadoCliente" Required="true">
+                        @foreach (var estado in estados)
+                        {
+                            <MudSelectItem Value="@estado.IdEstadoCliente">@estado.Nombre</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Guardar Cambios</MudButton>
+                    <MudButton Class="ml-2" Variant="Variant.Outlined" OnClick="Cancel" Color="Color.Default">Cancelar</MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    }
+</MudPaper>
+
+
+@code {
+    
+    private List<EstadoCliente> estados = new List<EstadoCliente>();
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        estados = await Repo.GetAllAsync<EstadoCliente>();        
+    }
+
+
+    private async Task ActualizarCliente()
+    {
+        Entity.FechaActualizacion = DateTime.Now;
+        await Save();
+        Snackbar.Add("Cliente actualizado exitosamente.", Severity.Success);
+    }
+
+    private void Cancel()
+    {
+        Nav.NavigateTo("/clientes");
+    }
+}
