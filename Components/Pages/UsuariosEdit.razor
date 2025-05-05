@@ -1,0 +1,76 @@
+﻿@page "/usuario-edit/{Id:int}"
+@inherits ProtelAppT.Service.CrudComponentBase<Usuario>
+@inject IGenericRepository Repo
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@using ProtelAppT.Repositories
+@using ProtelAppT.Data
+
+
+<MudPaper Class="pa-4 mx-auto mt-10" MaxWidth="700px" Elevation="6"
+          Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+    <MudText Typo="Typo.h5" Class="mb-4">Editar Cliente</MudText>
+
+    @if (Entity == null)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    }
+    else
+    {
+        <EditForm Model="Entity" OnValidSubmit="ActualizarUsuario">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudGrid>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Nombre del usuario" @bind-Value="Entity.Nombre" Required="true" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField Label="Email" @bind-Value="Entity.Correo" Lines="3" />
+                </MudItem>
+                
+
+                <MudItem xs="12">
+                    <MudSelect T="int" Label="Rol" @bind-Value="Entity.IdRol" Required="true">
+                        @foreach (var rol in Rols)
+                        {
+                            <MudSelectItem Value="@rol.IdRol">@rol.Nombre</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Guardar Cambios</MudButton>
+                    <MudButton Class="ml-2" Variant="Variant.Outlined" OnClick="Cancel" Color="Color.Default">Cancelar</MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    }
+</MudPaper>
+
+
+@code {
+
+    private List<Rol> Rols = new List<Rol>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Rols = await Repo.GetAllAsync<Rol>();
+    }
+
+
+    private async Task ActualizarUsuario()
+    {
+        await Save();
+        Snackbar.Add("Usuario actualizado.", Severity.Success);
+    }
+
+    private void Cancel()
+    {
+        Nav.NavigateTo("/usuarios");
+    }
+}

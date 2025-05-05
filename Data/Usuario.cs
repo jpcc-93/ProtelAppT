@@ -1,11 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Components;
 
 namespace ProtelAppT.Data
 {
     public class Usuario
     {
-        [Key]  //  Clave primaria de la tabla.
+
+        [Key]
+        [Parameter]
+        [Column("ID_USUARIO")]
+        public int Id { get; set; }
+        
         [StringLength(100)]
         [Column("CORREO")]
         public string Correo { get; set; }
@@ -16,7 +22,7 @@ namespace ProtelAppT.Data
         [Column("NOMBRE")]
         public string Nombre { get; set; }
 
-        [Required]
+        
         [StringLength(255)]
         [Column("PASSWORD_HASH")]
         public string PasswordHash { get; set; }
@@ -29,7 +35,10 @@ namespace ProtelAppT.Data
         // Propiedad de navegación para la relación con la tabla Rol.
         public Rol Rol { get; set; }
 
- 
+        [NotMapped] // Indica que esta propiedad no se mapea a la base de datos
+        public bool Seleccionado { get; set; }
+
+
     }
 
 

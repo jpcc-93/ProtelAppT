@@ -136,25 +136,6 @@
                                 .ToListAsync();
 
                                 // Llenar las listas para la gráfica de pastel
-        foreach (var estado in estudiosPorEstado)
-        {
-            datosGraficaPastel.Add(estado.Cantidad);
-            labelsGraficaPastel.Add(estado.Estado);
-            coloresGraficaPastel.Add(GetEstadoColor(estado.Estado).ToString()); // Usar la función GetEstadoColor
-        }
-    }
-    private MudBlazor.Color GetEstadoColor(string estado)
-    {
-        return estado switch
-        {
-            "En estudio" => MudBlazor.Color.Warning,
-            "Aprobado" => MudBlazor.Color.Success,
-            "Negado" => MudBlazor.Color.Error,
-            "Pendiente de Revisión" => MudBlazor.Color.Info,
-            "En Diseño" => MudBlazor.Color.Primary,
-            "Implementado" => MudBlazor.Color.Dark,
-            "Cancelado" => MudBlazor.Color.Default,
-            _ => MudBlazor.Color.Secondary,
-        };
+       
     }
 }

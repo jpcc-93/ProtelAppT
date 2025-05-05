@@ -1,0 +1,62 @@
+﻿@page "/usuario-add"
+@inherits ProtelAppT.Service.CrudComponentBase<Usuario>
+@inject IGenericRepository Repo
+@inject ISnackbar Snackbar
+@using ProtelAppT.Data
+@using ProtelAppT.Repositories
+
+<MudPaper Class="pa-6 mt-10 mx-auto rounded elevation-8" MaxWidth="600px"
+Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+    <MudText Typo="Typo.h5" Class="mb-4">Registrar Nuevo Usuario</MudText>
+
+
+    <EditForm Model="@Entity" OnValidSubmit="GuardarUsuario">
+        <ValidationSummary />
+        <DataAnnotationsValidator />
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField Label="Correo" @bind-Value="Entity.Correo" Required="true" />
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudTextField Label="Nombre" @bind-Value="Entity.Nombre" Required="true" />
+            </MudItem>
+
+
+            <MudItem xs="12" sm="6">
+                <MudSelect T="int" Label="Rol del usuario" @bind-Value="Entity.IdRol" Required="true">
+                    @foreach (var NombreRol in Rols)
+                    {
+                        <MudSelectItem Value="@NombreRol.IdRol">@NombreRol.Nombre</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Guardar</MudButton>
+            </MudItem>
+        </MudGrid>
+    </EditForm>
+</MudPaper>
+
+@code {
+
+    private List<Rol> Rols = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Rols = await Repo.GetAllAsync<Rol>();
+    }
+
+
+    private async Task GuardarUsuario()
+    {
+        
+        Entity.PasswordHash = "Protel123*";
+        await Save();
+        Snackbar.Add("Usuario agregado.", Severity.Success);
+
+    }
+
+}

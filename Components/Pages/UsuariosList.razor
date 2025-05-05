@@ -1,0 +1,105 @@
+﻿@page "/usuarios"
+@using ProtelAppT.Data
+@using Microsoft.EntityFrameworkCore
+@inject ProtelAppT.Data.ProtelDbContext _dbContext
+@inject NavigationManager _navigationManager
+@inject IDialogService DialogService
+@inject AuthenticationStateService _authServiceState
+@using ProtelAppT.Service
+@inject ISnackbar Snackbar
+
+@if (!_authServiceState.IsAuthenticated)
+{
+    _navigationManager.NavigateTo("/login");
+}
+
+
+<MudText Typo="Typo.h4" Class="mb-4" Align="Align.Center">Gestión de Usuarios</MudText>
+
+
+<MudTable Items="@usuarios"
+          @bind-SelectedItems="UsuarioSeleccionados"
+          MultiSelection="true"
+          Hover="true"
+          Dense="true"
+          Breakpoint="Breakpoint.Sm">
+    <ToolBarContent>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Outlined" OnClick="CrearUsuario" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>ID</MudTh>
+        <MudTh>Nombre</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>Rol</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Id</MudTd>
+        <MudTd>@context.Nombre</MudTd>
+        <MudTd>@context.Correo</MudTd>
+        <MudTd>@context.Rol?.Nombre</MudTd>
+        <MudTd></MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
+    </PagerContent>
+</MudTable>
+
+
+<div class="d-flex justify-end mt-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="ModificarUsuariosSeleccionados" Class="mr-2" Disabled="@(!UsuarioSeleccionados.Any())">Modificar</MudButton>
+    <MudButton Color="Color.Error " Variant="Variant.Filled" OnClick="EliminarUsuariosSeleccionados" Disabled="@(!UsuarioSeleccionados.Any())">Eliminar</MudButton>
+</div>
+
+
+
+@code {
+    private List<Usuario> usuarios = new List<Usuario>();
+    private HashSet<Usuario> UsuarioSeleccionados = new HashSet<Usuario>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await _dbContext.USUARIO.Include(c => c.Rol).ToListAsync();
+        usuarios.ForEach(c => c.Seleccionado = false);
+    }
+
+    private void CrearUsuario()
+    {
+        _navigationManager.NavigateTo("/usuario-add");
+    }
+
+    private void ModificarUsuariosSeleccionados()
+    {
+        if (UsuarioSeleccionados.Count == 1)
+        {
+            var id = UsuarioSeleccionados.First().Id;
+            _navigationManager.NavigateTo($"/usuario-edit/{id}");
+        }
+        else if (UsuarioSeleccionados.Count > 1)
+        {
+            Snackbar.Add("Selecciona solo un usuario para editar.", Severity.Warning);
+        }
+    }
+
+
+    private async Task EliminarUsuariosSeleccionados()
+    {
+        if (UsuarioSeleccionados.Any())
+        {
+            bool? result = await DialogService.ShowMessageBox(
+                "Confirmar Eliminación",
+                $"¿Seguro que quieres eliminar {UsuarioSeleccionados.Count} Usuarios?",
+                yesText: "Eliminar",
+                cancelText: "Cancelar");
+
+            if (result == true)
+            {
+                _dbContext.USUARIO.RemoveRange(UsuarioSeleccionados);
+                await _dbContext.SaveChangesAsync();
+                usuarios.RemoveAll(c => UsuarioSeleccionados.Contains(c));
+                UsuarioSeleccionados.Clear();
+                StateHasChanged();
+            }
+        }
+    }
+}

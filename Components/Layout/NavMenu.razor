@@ -24,9 +24,14 @@
     </MudNavGroup>
 
     <MudNavGroup Title="Administración" Icon="@Icons.Material.Filled.Settings" IconColor="Color.Inherit" Expanded="false">
-        <MudNavLink Href="/usuarios" IconColor="Color.Inherit" ActiveClass="mud-selected-navlink">
-            Usuarios
-        </MudNavLink>
+        <MudNavGroup Title="Usuarios" Icon="@Icons.Material.Filled.People" IconColor="Color.Inherit" Expanded="false">
+            <MudNavLink Href="/usuarios" IconColor="Color.Inherit" ActiveClass="mud-selected-navlink">
+                Lista de Usuarios
+            </MudNavLink>
+            <MudNavLink Href="/usuario-add" IconColor="Color.Inherit" ActiveClass="mud-selected-navlink">
+                Nuevo Usuario
+            </MudNavLink>
+        </MudNavGroup>
         
         <MudNavGroup Title="Roles" Icon="@Icons.Material.Filled.Groups" IconColor="Color.Inherit" Expanded="false">
             <MudNavLink Href="/roles" IconColor="Color.Inherit" ActiveClass="mud-selected-navlink">
