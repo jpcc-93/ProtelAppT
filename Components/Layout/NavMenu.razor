@@ -27,9 +27,15 @@
         <MudNavLink Href="/usuarios" IconColor="Color.Inherit" ActiveClass="mud-selected-navlink">
             Usuarios
         </MudNavLink>
-        <MudNavLink Href="/roles" IconColor="Color.Inherit" ActiveClass="mud-selected-navlink">
-            Roles
-        </MudNavLink>
+        
+        <MudNavGroup Title="Roles" Icon="@Icons.Material.Filled.Groups" IconColor="Color.Inherit" Expanded="false">
+            <MudNavLink Href="/roles" IconColor="Color.Inherit" ActiveClass="mud-selected-navlink">
+                Lista de Roles
+            </MudNavLink>
+            <MudNavLink Href="/rol-add" IconColor="Color.Inherit" ActiveClass="mud-selected-navlink">
+                Nuevo Rol
+            </MudNavLink>
+        </MudNavGroup>
 
     </MudNavGroup>
 

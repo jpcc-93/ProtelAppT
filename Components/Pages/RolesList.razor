@@ -1,0 +1,103 @@
+﻿@page "/roles"
+@using ProtelAppT.Data
+@using Microsoft.EntityFrameworkCore
+@inject ProtelAppT.Data.ProtelDbContext _dbContext
+@inject NavigationManager _navigationManager
+@inject IDialogService DialogService
+@inject AuthenticationStateService _authServiceState
+@using ProtelAppT.Service
+@inject ISnackbar Snackbar
+
+
+@if (!_authServiceState.IsAuthenticated)
+{
+    _navigationManager.NavigateTo("/login");
+}
+
+
+<MudText Typo="Typo.h4" Class="mb-4" Align="Align.Center">Gestión de Roles</MudText>
+
+
+<MudTable Items="@roles"
+          @bind-SelectedItems="rolesSeleccionados"
+          MultiSelection="true"
+          Hover="true"
+          Dense="true"
+          Breakpoint="Breakpoint.Sm">
+    <ToolBarContent>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Outlined" OnClick="CrearRol" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>ID</MudTh>
+        <MudTh>Nombre</MudTh>        
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.IdRol</MudTd>
+        <MudTd>@context.Nombre</MudTd>
+        <MudTd></MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{5, 10, 20}" />
+    </PagerContent>
+</MudTable>
+
+
+<div class="d-flex justify-end mt-4">
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="ModificarRolSeleccionados" Class="mr-2" Disabled="@(!rolesSeleccionados.Any())">Modificar</MudButton>
+    <MudButton Color="Color.Error " Variant="Variant.Filled" OnClick="EliminarRolSeleccionados" Disabled="@(!rolesSeleccionados.Any())">Eliminar</MudButton>
+</div>
+
+
+
+@code {
+    private List<Rol> roles = new List<Rol>();
+    private HashSet<Rol> rolesSeleccionados = new HashSet<Rol>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await _dbContext.ROL.ToListAsync();
+        roles.ForEach(r => r.Seleccionado = false);
+    }
+    
+    private void CrearRol()
+    {
+        _navigationManager.NavigateTo("/rol-add");
+    }
+
+    private void ModificarRolSeleccionados()
+    {
+        if (rolesSeleccionados.Count == 1)
+        {
+            var id = rolesSeleccionados.First().IdRol;
+            _navigationManager.NavigateTo($"/rol-edit/{id}");
+        }
+        else if (rolesSeleccionados.Count > 1)
+        {
+            Snackbar.Add("Selecciona solo un Rol para editar.", Severity.Warning);
+        }
+    }
+
+
+    private async Task EliminarRolSeleccionados()
+    {
+        if (rolesSeleccionados.Any())
+        {
+            bool? result = await DialogService.ShowMessageBox(
+                "Confirmar Eliminación",
+                $"¿Seguro que quieres eliminar {rolesSeleccionados.Count} roles?",
+                yesText: "Eliminar",
+                cancelText: "Cancelar");
+
+            if (result == true)
+            {
+                _dbContext.ROL.RemoveRange(rolesSeleccionados);
+                await _dbContext.SaveChangesAsync();
+                roles.RemoveAll(c => rolesSeleccionados.Contains(c));
+                rolesSeleccionados.Clear();
+                StateHasChanged();
+            }
+        }
+    }
+}
+
