@@ -61,38 +61,14 @@
                     <RowTemplate>
                         <MudTd DataLabel="Nombre Proyecto">@context.NombreProyecto</MudTd>
                         <MudTd DataLabel="Cliente">@context.Cliente?.Nombre</MudTd>
-                        <MudTd DataLabel="Estado">
-                            @*                         <MudChip Color="GetEstadoColor(context.EstadoFactibilidad?.NOMBRE)">
-                            @context.EstadoFactibilidad?.NOMBRE
-                        </MudChip> *@
+                        <MudTd DataLabel="Estado">                            
                         </MudTd>
                         <MudTd DataLabel="Fecha Solicitud">@context.FechaSolicitud.ToString("dd/MM/yyyy")</MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudCardContent>
         </MudCard>
-    </MudItem>
-
-    <MudItem xs="12" sm="6">
-        <MudCard Style="height:300px;">
-            <MudCardContent>
-                <MudText Typo="Typo.h5">Distribución de Estudios por Estado</MudText>
-            <MudChart ChartType="ChartType.Pie" Width="400px" Height="400px">
-                <MudSeries Data="@datosGraficaPastel"
-                           Label="@labelsGraficaPastel"
-                           BackgroundColors="@coloresGraficaPastel" />
-                <ChartOptions LegendPosition="OriginBottom" />
-            </MudChart>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
-    <MudItem xs="12" sm="6">
-        <MudCard Style="height:300px;">
-            <MudCardContent>
-                <MudText Typo="Typo.h6">Gráfico 2</MudText>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
+    </MudItem>    
 </MudGrid>
 
 @code {
