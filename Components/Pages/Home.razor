@@ -69,6 +69,17 @@
             </MudCardContent>
         </MudCard>
     </MudItem>    
+    <MudItem xs="12" sm="6">
+        <MudCard>
+            <MudCardContent>
+                <MudText Typo="Typo.h6">Estudios Activos por tipos</MudText>
+                <MudPaper Class="pa-4">
+                    <MudChart ChartType="ChartType.Pie" InputData="@data" InputLabels="@labels" Width="300px" Height="300px" />
+                </MudPaper>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
 </MudGrid>
 
 @code {
@@ -76,18 +87,29 @@
     private int estudiosActivos;
     private int totalestudios;
     private List<Factibilidad> estudiosRecientes; 
-    private List<double> datosGraficaPastel = new List<double>();
-    private List<string> labelsGraficaPastel = new List<string>();
-    private List<string> coloresGraficaPastel = new List<string>();
+    double[] data = Array.Empty<double>();
+    string[] labels = Array.Empty<string>();
 
 
     protected override async Task OnInitializedAsync()
     {
+
+        var query = await _dbContext.FACTIBILIDAD.GroupBy(f => f.EstadoFactibilidad.Nombre)
+            .Select(g => new { Estado = g.Key, Cantidad = g.Count() })
+            .ToListAsync();
+
+        labels = query.Select(x => x.Estado).ToArray();
+        data = query.Select(x => (double)x.Cantidad).ToArray();
+
+
         // Obtener el total de clientes activos
         totalClientes = await _dbContext.CLIENTE.CountAsync(); 
 
         // Obtener el número de estudios activo
-        estudiosActivos = _dbContext.FACTIBILIDAD.Count(f => f.IdEstadoFactibilidad == 1); 
+        var estadosActivos = new List<int> { 6, 7, 8, 9 };
+        estudiosActivos = await _dbContext.FACTIBILIDAD
+        .CountAsync(f => estadosActivos.Contains(f.IdEstadoFactibilidad));
+
 
         //total estudios
         totalestudios = await _dbContext.FACTIBILIDAD.CountAsync();
@@ -102,16 +124,12 @@
 
 
 
-        var estudiosPorEstado = await _dbContext.FACTIBILIDAD
-                                .GroupBy(f => f.EstadoFactibilidad.Nombre)
-                                .Select(g => new
-                                {
-                                    Estado = g.Key,
-                                    Cantidad = g.Count()
-                                })
-                                .ToListAsync();
+        var estudiosPorEstado = await _dbContext.FACTIBILIDAD.GroupBy(f => f.EstadoFactibilidad.Nombre)
+                                .Select(g => new{Estado = g.Key,Cantidad = g.Count()})
+                                .ToListAsync();   
+                               
 
-                                // Llenar las listas para la gráfica de pastel
-       
+
     }
+
 }

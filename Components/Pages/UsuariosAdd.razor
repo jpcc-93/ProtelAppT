@@ -51,12 +51,21 @@ Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
 
 
     private async Task GuardarUsuario()
-    {
-        
-        Entity.PasswordHash = "Protel123*";
+    {        
+        Entity.PasswordHash = BCrypt.Net.BCrypt.HashPassword("Protel123*");
+
         await Save();
         Snackbar.Add("Usuario agregado.", Severity.Success);
-
     }
+
+
+    // private async Task GuardarUsuario()
+    // {
+        
+    //     Entity.PasswordHash = "Protel123*";
+    //     await Save();
+    //     Snackbar.Add("Usuario agregado.", Severity.Success);
+
+    // }
 
 }
