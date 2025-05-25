@@ -1,0 +1,38 @@
+﻿@page "/reportes"
+@using ProtelAppT.Service
+@inject AuthenticationStateService _authServiceState
+@inject NavigationManager _navigationManager
+@inject ProtelAppT.Data.ProtelDbContext _dbContext
+@using ProtelAppT.Data
+@using Microsoft.EntityFrameworkCore
+@using MudBlazor.Charts
+@using MudBlazor.Components
+@using MudBlazor
+
+
+@if (!_authServiceState.IsAuthenticated)
+{
+    _navigationManager.NavigateTo("/login");
+}
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary">PDF</MudButton>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary">Excel</MudButton>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary">Word</MudButton>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
