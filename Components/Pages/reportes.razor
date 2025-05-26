@@ -16,27 +16,37 @@
     _navigationManager.NavigateTo("/login");
 }
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
-    <MudGrid>
-        <MudItem xs="12" sm="6" md="4">
-            <MudCard>
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary">PDF</MudButton>
-            </MudCard>
-        </MudItem>
+else if (_authServiceState.GetUserRole() != "Administrador")
+{
+    <MudText Color="Color.Error" Typo="Typo.h6">
+        No tienes permiso para ver esta página.
+    </MudText>
+    return;
+}
+else
+{
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary">PDF</MudButton>
+                </MudCard>
+            </MudItem>
 
-        <MudItem xs="12" sm="6" md="4">
-            <MudCard>
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="GenerateExcel"> Excel </MudButton>
-            </MudCard>
-        </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="GenerateExcel">Excel</MudButton>
+                </MudCard>
+            </MudItem>
 
-        <MudItem xs="12" sm="6" md="4">
-            <MudCard>
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary">Word</MudButton>
-            </MudCard>
-        </MudItem>
-    </MudGrid>
-</MudContainer>
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary">Word</MudButton>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+}
 
 
 @code{

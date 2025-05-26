@@ -56,7 +56,8 @@
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Correo, ClaimValueTypes.String),
-               //pendiente agregar rol
+                new Claim(ClaimTypes.Role, user.Rol.Nombre, ClaimValueTypes.String),
+               
             };
             var identity = new ClaimsIdentity(claims, "ProtelAuth");
             var principal = new ClaimsPrincipal(identity);

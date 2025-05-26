@@ -28,7 +28,9 @@ namespace ProtelAppT.Service
         }
         public async Task<Usuario> AuthenticateUser(string email, string password)
         {
-            var user = await _context.USUARIO.FirstOrDefaultAsync(u => u.Correo == email);
+            var user = await _context.USUARIO
+                .Include(u => u.Rol)
+                .FirstOrDefaultAsync(u => u.Correo == email);
 
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
