@@ -1,13 +1,14 @@
 ﻿@page "/reportes"
 @using ProtelAppT.Service
+@using NPOI.SS.UserModel
+@using NPOI.XSSF.UserModel
+@using System.IO
+@inject IJSRuntime jsRuntime
 @inject AuthenticationStateService _authServiceState
 @inject NavigationManager _navigationManager
 @inject ProtelAppT.Data.ProtelDbContext _dbContext
 @using ProtelAppT.Data
-@using Microsoft.EntityFrameworkCore
-@using MudBlazor.Charts
-@using MudBlazor.Components
-@using MudBlazor
+
 
 
 @if (!_authServiceState.IsAuthenticated)
@@ -25,7 +26,7 @@
 
         <MudItem xs="12" sm="6" md="4">
             <MudCard>
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary">Excel</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="GenerateExcel"> Excel </MudButton>
             </MudCard>
         </MudItem>
 
@@ -36,3 +37,59 @@
         </MudItem>
     </MudGrid>
 </MudContainer>
+
+
+@code{
+
+
+    private async Task GenerateExcel()
+    {
+        var factibilidades = _dbContext.FACTIBILIDAD
+        .Select(f => new
+        {
+            f.IdFactibilidad,
+            Cliente = f.Cliente.Nombre,
+            proyecto = f.NombreProyecto,
+            descripcion = f.Descripcion,
+            ubicacion = f.Ubicacion,
+            Inicio = f.FechaSolicitud,
+            Estado = f.EstadoFactibilidad.Nombre
+        }).ToList();
+
+
+        var workbook = new XSSFWorkbook();
+        var sheet = workbook.CreateSheet("Factibilidad");
+        var headerRow = sheet.CreateRow(0);
+        headerRow.CreateCell(0).SetCellValue("Id Factibilidad");
+        headerRow.CreateCell(1).SetCellValue("Cliente");
+        headerRow.CreateCell(2).SetCellValue("Proyecto");
+        headerRow.CreateCell(3).SetCellValue("Descripción");
+        headerRow.CreateCell(4).SetCellValue("Ubicación");
+        headerRow.CreateCell(5).SetCellValue("Fecha Solicitud");
+        headerRow.CreateCell(6).SetCellValue("Estado");
+
+        for (int i = 0; i < factibilidades.Count; i++)
+        {
+            var factibilidad = factibilidades[i];
+            var row = sheet.CreateRow(i + 1);
+            row.CreateCell(0).SetCellValue(factibilidad.IdFactibilidad);
+            row.CreateCell(1).SetCellValue(factibilidad.Cliente);
+            row.CreateCell(2).SetCellValue(factibilidad.proyecto);
+            row.CreateCell(3).SetCellValue(factibilidad.descripcion);
+            row.CreateCell(4).SetCellValue(factibilidad.ubicacion);
+            row.CreateCell(5).SetCellValue(factibilidad.Inicio.ToString("dd/MM/yyyy"));
+            row.CreateCell(6).SetCellValue(factibilidad.Estado);
+        }
+
+        byte[] fileBytes;
+
+        using (var Stream = new MemoryStream())
+        {
+            workbook.Write(Stream);
+            fileBytes = Stream.ToArray();
+            Stream.Close();
+        }
+
+        await jsRuntime.SaveAsFileAsync("Factibilidad.xlsx", fileBytes, "application/vnd.stream-excel");
+    }
+}
