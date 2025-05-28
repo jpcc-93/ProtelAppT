@@ -16,6 +16,7 @@ builder.Services.AddDbContext<ProtelDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IGenericRepository, GenericRepository>();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<ReporteService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AuthenticationStateService>();

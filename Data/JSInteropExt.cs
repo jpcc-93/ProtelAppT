@@ -8,5 +8,6 @@ namespace ProtelAppT.Data
         {
             await js.InvokeAsync<object>("JSInteropExt.saveAsFile", fileName, type, Convert.ToBase64String(data));
         }
+
     }
 }
