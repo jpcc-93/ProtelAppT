@@ -30,7 +30,7 @@ else
         <MudGrid>
             <MudItem xs="12" sm="6" md="4">
                 <MudCard>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Primary">PDF</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="GeneratePdf">PDF</MudButton>
                 </MudCard>
             </MudItem>
 
@@ -108,5 +108,11 @@ else
     {
         var bytes = await word.GenerarReporteWordAsync();
         await jsRuntime.SaveAsFileAsync("reporte_factibilidades.docx", bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");            
+    }
+
+    private async Task GeneratePdf()
+    {
+        var bytes = await word.GenerarReportePdfAsync();
+        await jsRuntime.SaveAsFileAsync("reporte_factibilidades.pdf", bytes, "application/pdf");
     }
 }

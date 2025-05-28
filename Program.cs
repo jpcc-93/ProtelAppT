@@ -5,6 +5,7 @@ using ProtelAppT.Data;
 using ProtelAppT.Service;
 using Microsoft.AspNetCore.Http;
 using ProtelAppT.Repositories;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,11 +17,13 @@ builder.Services.AddDbContext<ProtelDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IGenericRepository, GenericRepository>();
 builder.Services.AddScoped<UsuarioService>();
+QuestPDF.Settings.License = LicenseType.Community;
 builder.Services.AddScoped<ReporteService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AuthenticationStateService>();
 builder.Services.AddDistributedMemoryCache();
+
 
 var app = builder.Build();
 
