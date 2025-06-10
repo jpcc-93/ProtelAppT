@@ -3,8 +3,30 @@
 @inherits ProtelAppT.Service.CrudComponentBase<Factibilidad>
 @inject IGenericRepository Repo
 @inject ISnackbar Snackbar
+@inject AuthenticationStateService _authServiceState
+@inject NavigationManager _navigationManager
 @using ProtelAppT.Data
 @using ProtelAppT.Repositories
+@using ProtelAppT.Service
+
+
+
+@if (!_authServiceState.IsAuthenticated)
+{
+    _navigationManager.NavigateTo("/login");
+}
+
+else if (_authServiceState.GetUserRole() != "Administrador")
+{
+    <MudPaper Class="d-flex justify-center align-center" Style="height: 100vh;">
+        <MudText Color="Color.Error" Typo="Typo.h6" Class="text-center">
+            No tienes permiso para ver esta página.
+        </MudText>
+    </MudPaper>
+    return;
+}
+else
+{
 
 <MudPaper Class="pa-4 mx-auto mt-10" MaxWidth="700px" Elevation="6"
           Style="border: 1px solid #ccc; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
@@ -51,6 +73,7 @@
         </MudGrid>
     </EditForm>
 </MudPaper>
+}
 
 @code {
     private List<Cliente> clientes = new();

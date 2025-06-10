@@ -3,12 +3,15 @@
 @using NPOI.SS.UserModel
 @using NPOI.XSSF.UserModel
 @using System.IO
+@using ProtelAppT.Data
+@using System.Net.Mail
+@using System.Net
 @inject IJSRuntime jsRuntime
 @inject AuthenticationStateService _authServiceState
 @inject NavigationManager _navigationManager
 @inject ProtelAppT.Data.ProtelDbContext _dbContext
 @inject ProtelAppT.Service.ReporteService word
-@using ProtelAppT.Data
+@inject ISnackbar Snackbar
 
 
 
@@ -19,9 +22,11 @@
 
 else if (_authServiceState.GetUserRole() != "Administrador")
 {
-    <MudText Color="Color.Error" Typo="Typo.h6">
-        No tienes permiso para ver esta página.
-    </MudText>
+    <MudPaper Class="d-flex justify-center align-center" Style="height: 100vh;">
+        <MudText Color="Color.Error" Typo="Typo.h6" Class="text-center">
+            No tienes permiso para ver esta página.
+        </MudText>
+    </MudPaper>
     return;
 }
 else
@@ -46,63 +51,42 @@ else
                 </MudCard>
             </MudItem>
         </MudGrid>
+
+        <MudGrid Class="mt-6">
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_emailDestino"
+                              Label="Correo electrónico"
+                              Variant="Variant.Outlined"
+                              FullWidth="true" />
+            </MudItem>
+            <MudItem xs="12" Class="mt-2">
+                <MudButton Color="Color.Success"
+                           Variant="Variant.Filled"
+                           OnClick="EnviarReportesPorCorreo"
+                           FullWidth="true">
+                    Enviar reportes por correo
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+
     </MudContainer>
 }
 
 
 @code{
+    private string message { get; set; } = "";
+    private string _emailDestino = string.Empty;
+
 
 
     private async Task GenerateExcel()
     {
-        var factibilidades = _dbContext.FACTIBILIDAD
-        .Select(f => new
-        {
-            f.IdFactibilidad,
-            Cliente = f.Cliente.Nombre,
-            proyecto = f.NombreProyecto,
-            descripcion = f.Descripcion,
-            ubicacion = f.Ubicacion,
-            Inicio = f.FechaSolicitud,
-            Estado = f.EstadoFactibilidad.Nombre
-        }).ToList();
-
-
-        var workbook = new XSSFWorkbook();
-        var sheet = workbook.CreateSheet("Factibilidad");
-        var headerRow = sheet.CreateRow(0);
-        headerRow.CreateCell(0).SetCellValue("Id Factibilidad");
-        headerRow.CreateCell(1).SetCellValue("Cliente");
-        headerRow.CreateCell(2).SetCellValue("Proyecto");
-        headerRow.CreateCell(3).SetCellValue("Descripción");
-        headerRow.CreateCell(4).SetCellValue("Ubicación");
-        headerRow.CreateCell(5).SetCellValue("Fecha Solicitud");
-        headerRow.CreateCell(6).SetCellValue("Estado");
-
-        for (int i = 0; i < factibilidades.Count; i++)
-        {
-            var factibilidad = factibilidades[i];
-            var row = sheet.CreateRow(i + 1);
-            row.CreateCell(0).SetCellValue(factibilidad.IdFactibilidad);
-            row.CreateCell(1).SetCellValue(factibilidad.Cliente);
-            row.CreateCell(2).SetCellValue(factibilidad.proyecto);
-            row.CreateCell(3).SetCellValue(factibilidad.descripcion);
-            row.CreateCell(4).SetCellValue(factibilidad.ubicacion);
-            row.CreateCell(5).SetCellValue(factibilidad.Inicio.ToString("dd/MM/yyyy"));
-            row.CreateCell(6).SetCellValue(factibilidad.Estado);
-        }
-
-        byte[] fileBytes;
-
-        using (var Stream = new MemoryStream())
-        {
-            workbook.Write(Stream);
-            fileBytes = Stream.ToArray();
-            Stream.Close();
-        }
-
-        await jsRuntime.SaveAsFileAsync("Factibilidad.xlsx", fileBytes, "application/vnd.stream-excel");
+        var bytes = await word.GenerarReporteExcelAsync();
+        await jsRuntime.SaveAsFileAsync("Factibilidad.xlsx", bytes, "application/vnd.stream-excel");
     }
+
+
+
 
     private async Task GenerateWord()
     {
@@ -110,9 +94,59 @@ else
         await jsRuntime.SaveAsFileAsync("reporte_factibilidades.docx", bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");            
     }
 
+
+
+
     private async Task GeneratePdf()
     {
         var bytes = await word.GenerarReportePdfAsync();
         await jsRuntime.SaveAsFileAsync("reporte_factibilidades.pdf", bytes, "application/pdf");
     }
+
+
+
+
+    private async Task EnviarReportesPorCorreo()
+    {
+        try
+        {
+            using (MailMessage mail = new MailMessage())
+            {
+                mail.From = new MailAddress("rpokcho@gmail.com");
+                mail.To.Add(_emailDestino);
+                mail.Subject = "Reportes de Factibilidad";
+                mail.Body = "Adjunto los reportes de factibilidad en formato PDF, Excel y Word.";
+                mail.IsBodyHtml = true;
+
+                var pdfStream = new MemoryStream(await word.GenerarReportePdfAsync());
+                pdfStream.Position = 0;
+                mail.Attachments.Add(new Attachment(pdfStream, "reporte_factibilidades.pdf", "application/pdf"));
+
+                var wordStream = new MemoryStream(await word.GenerarReporteWordAsync());
+                wordStream.Position = 0;
+                mail.Attachments.Add(new Attachment(wordStream, "reporte_factibilidades.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
+
+                var excelStream = new MemoryStream(await word.GenerarReporteExcelAsync());
+                excelStream.Position = 0;
+                mail.Attachments.Add(new Attachment(excelStream, "Factibilidad.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+
+
+
+                using (SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    smtp.Credentials = new NetworkCredential("rpokcho@gmail.com", "xjpa jklc llyx yjqh");
+                    smtp.EnableSsl = true;
+                    await smtp.SendMailAsync(mail);
+                    Snackbar.Add("Reportes enviados correctamente.", Severity.Success);
+
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            message = ex.Message;
+            throw;
+        }
+    }
+
 }

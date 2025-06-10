@@ -102,16 +102,15 @@
         data = query.Select(x => (double)x.Cantidad).ToArray();
 
 
-        // Obtener el total de clientes activos
         totalClientes = await _dbContext.CLIENTE.CountAsync(); 
 
-        // Obtener el número de estudios activo
+
         var estadosActivos = new List<int> { 6, 7, 8, 9 };
         estudiosActivos = await _dbContext.FACTIBILIDAD
         .CountAsync(f => estadosActivos.Contains(f.IdEstadoFactibilidad));
 
 
-        //total estudios
+      
         totalestudios = await _dbContext.FACTIBILIDAD.CountAsync();
 
         // Obtener los estudios de factibilidad más recientes 

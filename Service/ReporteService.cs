@@ -3,12 +3,13 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
-using System.IO;
-using System.Linq;
 using ProtelAppT.Data;
 using Microsoft.EntityFrameworkCore;
 using Document = QuestPDF.Fluent.Document;
+using NPOI.XSSF.UserModel;
+
+
+
 namespace ProtelAppT.Service 
 {
 
@@ -98,6 +99,9 @@ namespace ProtelAppT.Service
 
 
 
+
+
+
         public async Task<byte[]> GenerarReportePdfAsync()
         {
             try
@@ -167,10 +171,62 @@ namespace ProtelAppT.Service
             }
             catch (Exception ex)
             {
-                Console.WriteLine("🔥 ERROR PDF: " + ex.Message);
+                Console.WriteLine("ERROR PDF: " + ex.Message);
                 throw;
             }
         }
 
+
+
+
+
+
+
+        public async Task<byte[]> GenerarReporteExcelAsync()
+        {
+            var factibilidades = await _dbContext.FACTIBILIDAD
+                .Include(f => f.Cliente)
+                .Include(f => f.EstadoFactibilidad)
+                .Select(f => new
+                {
+                    f.IdFactibilidad,
+                    Cliente = f.Cliente.Nombre,
+                    proyecto = f.NombreProyecto,
+                    descripcion = f.Descripcion,
+                    ubicacion = f.Ubicacion,
+                    Inicio = f.FechaSolicitud,
+                    Estado = f.EstadoFactibilidad.Nombre
+                })
+                .ToListAsync();
+
+            var workbook = new XSSFWorkbook();
+            var sheet = workbook.CreateSheet("Factibilidad");
+
+            var headerRow = sheet.CreateRow(0);
+            headerRow.CreateCell(0).SetCellValue("Id Factibilidad");
+            headerRow.CreateCell(1).SetCellValue("Cliente");
+            headerRow.CreateCell(2).SetCellValue("Proyecto");
+            headerRow.CreateCell(3).SetCellValue("Descripción");
+            headerRow.CreateCell(4).SetCellValue("Ubicación");
+            headerRow.CreateCell(5).SetCellValue("Fecha Solicitud");
+            headerRow.CreateCell(6).SetCellValue("Estado");
+
+            for (int i = 0; i < factibilidades.Count; i++)
+            {
+                var f = factibilidades[i];
+                var row = sheet.CreateRow(i + 1);
+                row.CreateCell(0).SetCellValue(f.IdFactibilidad);
+                row.CreateCell(1).SetCellValue(f.Cliente);
+                row.CreateCell(2).SetCellValue(f.proyecto);
+                row.CreateCell(3).SetCellValue(f.descripcion);
+                row.CreateCell(4).SetCellValue(f.ubicacion);
+                row.CreateCell(5).SetCellValue(f.Inicio.ToString("dd/MM/yyyy"));
+                row.CreateCell(6).SetCellValue(f.Estado);
+            }
+
+            using var stream = new MemoryStream();
+            workbook.Write(stream);
+            return stream.ToArray();
+        }
     }
 }
