@@ -112,7 +112,8 @@ else
         {
             using (MailMessage mail = new MailMessage())
             {
-                mail.From = new MailAddress("rpokcho@gmail.com");
+                // Configura el correo electrónico, hay 2 partes, aqui y en la linea 138 de este mismo componente
+                mail.From = new MailAddress("Tu Email");
                 mail.To.Add(_emailDestino);
                 mail.Subject = "Reportes de Factibilidad";
                 mail.Body = "Adjunto los reportes de factibilidad en formato PDF, Excel y Word.";
@@ -134,7 +135,9 @@ else
 
                 using (SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587))
                 {
-                    smtp.Credentials = new NetworkCredential("rpokcho@gmail.com", "xjpa jklc llyx yjqh");
+                    smtp.Credentials = new NetworkCredential("Tucorreo", "Tu Contraseña");
+                    //tiene que ser gmail
+                    //la contraseña debe de ser el keyapp de la cuenta de gmail
                     smtp.EnableSsl = true;
                     await smtp.SendMailAsync(mail);
                     Snackbar.Add("Reportes enviados correctamente.", Severity.Success);
